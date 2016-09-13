@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html ng-app ng-controller="PositionStatusController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="PositionStatusContent/css/main.css">
+</head>
+<body class="um-vp bc-bg">
+    <div id="divLoading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="listContent" style="display: none;">
+        <div id="divContent" class="c-wh">
+            <div>
+                <ul class="uinn-a7">
+                    <li class="ubb ub bc-border bc-text ub-ac lis singleStatus" ng-repeat="status in StatusArr"
+                        statusid="{{status.ID}}">
+                        <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 NickName" ng-bind="status.Name"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>
+<script src="../../js/appcan.listview.js"></script>
+<script src="../../js/angular.min.js"></script>
+<script src="../../js/Common.js"></script>
+<script>
+    appcan.ready(function () {
+        $("#divLoading").hide();
+        $("#listContent").show();
+        $(".uinn-a7 li").on("touchstart", function () {
+            $(this).addClass("sc-bg-active");
+            setTimeout("$('.uinn-a7 li').removeClass('sc-bg-active');", 300);
+        });
+        appcan.initBounce();
+    });
+    function PositionStatusController($scope) {
+        var isSuccess = 0;
+        var parameters = { "accessToken": "token" };
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Type = apiConfig.GetLocationStatus.Type;
+        var url = apiConfig.GetLocationStatus.Url;
+        $.ajax({
+            url: url,
+            type: Type,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                //appcan.locStorage.setVal("EmailContacts", data);
+                $scope.StatusArr = data;
+                $scope.$apply();
+                //alert(JSON.stringify(data));
+            },
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+
+                }
+                ClickEventStatus();
+            }
+        });
+    }//控制器结束
+
+    $(function () {
+        $("ul li:last-child").css({ "border-bottom": "#FFFFFF" });
+    });
+    //跨页面执行函数
+    function ConfirmStatus() {
+        appcan.window.evaluateScript({
+            name: "PositionStatus",
+            scriptContent: "CloseWindowStatus()"
+        });
+        uexWindow.evaluateMultiPopoverScript("OneCardSolution", 'content', 'LocationContent', 'AddStatus()');
+    }
+    //当点击某项的时候，把该项以json形式存储到本地
+    function ClickEventStatus() {
+        $(".singleStatus").on("click", function () {
+            var statusId = $(this).attr("StatusId");
+            var statusName = $(this).children().html();
+            var status = { "ID": statusId, "Name": statusName };
+            appcan.locStorage.val("Status", status);
+            ConfirmStatus();
+        });
+    }
+</script>
+</html>
+
+

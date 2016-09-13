@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html ng-app="ContactAngular" ng-controller="contactController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px" style="overflow-y:hidden">
+<head>
+    <title>联系人</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="css/ui-box.css">
+    <link rel="stylesheet" href="css/ui-base.css">
+    <link rel="stylesheet" href="css/ui-color.css">
+    <link rel="stylesheet" href="css/appcan.icon.css">
+    <link rel="stylesheet" href="css/appcan.control.css">
+    <link rel="stylesheet" href="MyContactContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+<!--<div class="spinner">-->
+    <!--<div class="rect1"></div>-->
+    <!--<div class="rect2"></div>-->
+    <!--<div class="rect3"></div>-->
+    <!--<div class="rect4"></div>-->
+    <!--<div class="rect5"></div>-->
+<!--</div>-->
+<div id="divLoading" class="ub-f1">
+    <div class="loading">
+        <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+    </div>
+</div>
+<div id="show" style="display:none;">
+    <div class="bc-bg" id="NoData" ng-if="NoContact==1&&NoGroup==1">
+        <div class="NoDataImg_box ">
+            <div class="NoDataImg_bg"></div>
+        </div>
+        <div class="NoData_box NoData_color">
+            抱歉，暂时没有您要查看的数据！
+        </div>
+    </div>
+    <div id="ContactContent" ng-if="NoContact!=1 || NoGroup != 1">
+        <div id="divContent" class="c-wh">
+            <ul class="uinn-a7 allGroup">
+                <li class="ubb ub bc-border bc-text ub-ac lis groupContact cg" ng-repeat="group in Groups" id="group{{group.GroupId}}" easemobid="{{group.EaseMobGroupId}}" groupowner="{{group.GroupOwner}}">
+                    <div class="lis-icon-s ub-img groupIcon" style="background-image: url(MyContactContent/css/myImg/avr.png); "></div>
+                    <!--<div class="lis-icon-s ub-img groupIcon" style="background-image: url('{{group.Icon}}');"></div>-->
+                    <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">{{group.GroupName}}</div>
+                    <div class="fa fa-angle-right ulev2 sc-text"></div>
+                </li>
+            </ul>
+            <div class="friendsContent">
+                <div ng-repeat="letter in ContactCodes | orderBy:'name'">
+                    <div id="{{letter.name}}" class="uinn3 sc-bg bc-text" ng-if="letter!=''&&letter!=null">{{letter.name}}</div>
+                    <ul class="uinn-a7">
+                        <li class="ubb ub bc-border bc-text ub-ac lis singleContact cg" ng-repeat="contact in Contacts" ng-if="contact.NameSpell[0].toUpperCase()==letter.name&&contact.Name!=''&&contact.Name!=null " id="Contact{{contact.UserName}}" uid="{{contact.FriendUserId}}">
+                            <div class="lis-icon-s ub-img" style="background-image: url(MyContactContent/css/myImg/NoContactIcon.png)" ng-if="contact.PortraitUri==null||contact.PortraitUri==''"></div>
+                            <div class="lis-icon-s ub-img" style="background-image: url('{{contact.PortraitUri}}')" ng-if="contact.PortraitUri!=null&&contact.PortraitUri!=''"></div>
+                            <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 contactName">{{contact.Name}}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="indexBar ub ub-ver">
+            <div>↑</div>
+            <div>#</div>
+            <div>A</div>
+            <div>B</div>
+            <div>C</div>
+            <div>D</div>
+            <div>E</div>
+            <div>F</div>
+            <div>G</div>
+            <div>H</div>
+            <div>I</div>
+            <div>J</div>
+            <div>K</div>
+            <div>L</div>
+            <div>M</div>
+            <div>N</div>
+            <div>O</div>
+            <div>P</div>
+            <div>Q</div>
+            <div>R</div>
+            <div>S</div>
+            <div>T</div>
+            <div>U</div>
+            <div>V</div>
+            <div>W</div>
+            <div>X</div>
+            <div>Y</div>
+            <div>Z</div>
+        </div>
+    </div>
+</div>
+<script src="js/appcan.js"></script>
+<script src="js/appcan.control.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/Common.js"></script>
+</body>
+<script>
+    var contactModule = angular.module('ContactAngular', []);
+
+    $(function () {
+        $(".uinn-a7 li").on("click", function () {
+            $(this).addClass("sc-bg-active");
+            setTimeout("$('.uinn-a7 li').removeClass('sc-bg-active');", 300);
+        });
+
+        $(".indexBar div").on("touchstart", function () {
+            $(".indexBar").addClass("sc-bg-active");
+            var txt = $(this).html();
+            if (txt == "↑") location.href = "#addContact";
+            else location.href = "#" + txt;
+        });
+
+        $(".indexBar").on("touchmove", function () {
+            event.preventDefault();
+            var touch = event.touches[0];
+            var touchY = touch.pageY;
+            var childLen = $(".indexBar div").length;
+            var indexBarH = $(".indexBar").offset().height;
+            var txt;
+            var minY;
+            var maxY;
+
+            $(".indexBar div").each(function (i) {
+
+                minY = i * (indexBarH / childLen) + 1;
+                maxY = (i + 1) * (indexBarH / childLen);
+                if (touchY >= minY && touchY <= maxY) {
+                    txt = $(this).html();
+                    if (txt == "↑") location.href = "#addContact";
+                    else location.href = "#" + txt;
+                    return false;
+                }
+            });
+
+            // if (txt != undefined) {
+            // appcan.window.openToast(txt, 9000000);
+            // }
+        });
+        $(".indexBar").on("touchend", function () {
+            $('.indexBar').removeClass('sc-bg-active');
+            //appcan.window.closeToast();
+        });
+
+    })
+
+    appcan.ready(function () {
+        //appcan.initBounce();
+        //var plat = uexWidgetOne.getPlatform();
+        ////如果是iOS取消滚动条隐藏
+        //if (!plat) {
+        //    $("html").removeAttr("style");
+        //}
+        GetSchoolOrganization();
+        $("#show").show();
+        $("#divLoading").hide();
+        //index bar
+        var x = parseInt($('#divContent').offset().width); //480
+        var em = $('#divContent').css('font-size');//24px
+        var w = 1.5 * parseInt(em);//1.4 * 24
+        var h = appcan.getLocVal('uexIndexBar_h') + "px";//622
+
+        $(".indexBar").css({ position: "fixed", top: "0", left: (x - w) + "px", height: h, width: w + "px", "z-index": "99999" });
+        $(".indexBar").css("z-index", "99999");
+        $(".indexBar div").addClass("ub-f1").css({ "text-align": "center" });
+
+        LongPressEvent();
+    });//appcan.ready结束
+
+    //angularjs控制器
+    function contactController($scope) {
+        BindContacts($scope);
+        BindGroups($scope);
+    }//控制器结束
+
+    //绑定联系人
+    function BindContacts($scope) {
+        $scope.ContactCodes = [];
+        var allContacts;
+        var token = appcan.locStorage.val("Token");
+        var userName = appcan.locStorage.val("MyUserID");
+        var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+        var Url = apiConfig.GetFriendList.Url;
+        var Type = apiConfig.GetFriendList.Type;
+        var parameters = { "userName": userName };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                allContacts = data.Result;
+                if (allContacts == "") {
+                    $scope.NoContact = 1;
+                    $scope.$apply();
+                } else {
+                    DistinctCode(allContacts);
+
+                    $scope.Contacts = allContacts;
+                    $scope.$apply();
+
+                    appcan.locStorage.setVal("AllContacts", allContacts);
+                    ClickEvent();
+                    LongPressEvent();
+                }
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                }
+            }
+        });
+
+        //首字母去重
+        function DistinctCode(Contacts) {
+            for (var i in Contacts) {
+                var contact = Contacts[i].NameSpell[0].toUpperCase();
+                if (JSON.stringify($scope.ContactCodes).indexOf(JSON.stringify({"name":contact})) < 0) {
+                    $scope.ContactCodes.push({"name":contact});
+                }
+            }
+
+            //$scope.$apply();
+        }
+    }
+
+    //绑定分组
+    function BindGroups($scope) {
+        var token = appcan.locStorage.val("Token");
+        var userName = appcan.locStorage.val("MyUserID");
+        var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+        var Url = apiConfig.GetGroups.Url;
+        var Type = apiConfig.GetGroups.Type;
+        var parameters = { "userId": userName };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                if (data.Result == "") {
+                    $scope.NoGroup = 1;
+                    $scope.$apply();
+                } else {
+                    $scope.Groups = data.Result;
+                    $scope.$apply();
+                    ClickEvent();
+                }
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                }
+            }
+        });
+    }
+
+    $(function () {
+        $("ul li:last-child").css({ "border-bottom": "#FFFFFF" });
+    });
+
+    function ClickEvent() {
+        $(".singleContact").on("tap", function () {
+            $(this).addClass("btn-act2");
+            setTimeout("RemoveClass ()", 200);
+            var touchendName = $(this).find(".contactName").html();
+            var touchendID = $(this).attr("id");
+            var TouchendID = touchendID.substring(7, touchendID.length);
+            appcan.locStorage.setVal("contactName", touchendName);
+            appcan.locStorage.setVal("contactID", TouchendID);
+            appcan.window.open("SingleContact", "MyContact/SingleContact.html", 2);
+        });
+
+        $(".groupContact").on("tap", function () {
+            $(this).addClass("btn-act2");
+            setTimeout("RemoveClass ()", 200);
+            var schoolName = $(this).find(".groupName").html(),
+                    schoolId = $(this).attr("schoolId");
+            var schoolOrganizationArray = new Array();
+            var str = { "Name": schoolName, "ID": schoolId };
+            schoolOrganizationArray.push(str);
+            appcan.locStorage.setVal("SchoolOrganizationArray", schoolOrganizationArray);
+            var id = $(this).attr("id");
+            if (id == 'schoolOrganization') {
+                (branch == 'groups') ? appcan.window.open("SchoolOrganizationGroups", "MyContact/SchoolOrganizationGroups.html", 2) : appcan.window.open("SchoolOrganizationContacts", "MyContact/SchoolOrganizationContacts.html", 2);
+            } else {
+                var groupName = $(this).find(".groupName").html();
+                var groupId = $(this).attr("id");
+                groupId = groupId.substring(5, groupId.length);
+                var easeMobId = $(this).attr("easeMobId");
+                var groupOwner = $(this).attr("groupOwner");
+                appcan.locStorage.setVal("GroupName", groupName);
+                appcan.locStorage.setVal("GroupId", groupId);
+                appcan.locStorage.setVal("EaseMobId", easeMobId);
+                appcan.locStorage.setVal("GroupOwner", groupOwner);
+                appcan.window.open("Chatroom", "ChatWindow/Chatroom.html", 2);
+            }
+        });
+    }
+
+    function RemoveClass() {
+        $(".singleContact").removeClass("btn-act2");
+        $(".groupContact").removeClass("btn-act2");
+    }
+
+    //同意好友申请后(暂时没用)
+    function AddContact(friendName) {
+        $.when(SearchContactData(friendName)).done(function (data) {
+            var userName = data.Resule.UserName,
+                    letter = data.Result.NameSpell[0].toUpperCase(),
+                    head = data.Result.PortraitUri,
+                    name = data.Result.Name;
+            if (head == "") {
+                head = "MyContactContent/css/myImg/NoContactIcon.png";
+            }
+            var html = '';
+            html += '<li class="ubb ub bc-border bc-text ub-ac lis singleContact cg" id="Contact' + userName + '>';
+            html += '<div class="lis-icon-s ub-img" style="background-image: url(' + head + ')"></div>';
+            html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 contactName">' + name + '</div>';
+            html += '</li>';
+        });
+    }
+
+    function AddGroup() {
+        appcan.window.openToast("创建分组成功!", 2000);
+        var data = JSON.parse(appcan.locStorage.val("AddGroupData"));
+        var groupId = data.Result.GroupId;
+        var groupName = data.Result.GroupName;
+        var easeMobGroupId = data.Result.EaseMobGroupId;
+        var groupOwner = data.Result.GroupOwner;
+        var html = '';
+        html += '<ul class="uinn-a7">';
+        html += '<li class="ubb ub bc-border bc-text ub-ac lis groupContact" id="group' + groupId + '" easeMobId="' + easeMobGroupId + '" groupOwner="' + groupOwner + '">';
+        html += '<div class="lis-icon-s ub-img groupIcon" style="background-image: url(MyContactContent/css/myImg/avr.png); "></div>';
+        html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">' + groupName + '</div>';
+        html += '<div class="fa fa-angle-right ulev2 sc-text"></div>';
+        html += '</li></ul>';
+        $("#divContent").prepend(html);
+        ClickEvent();
+    }
+
+    function DeleteContact() {
+        appcan.window.openToast(" 删除中...");
+        var userName = appcan.locStorage.val("MyUserID");
+        userName = GetMyGuid(userName);
+        var friendUserName = appcan.locStorage.val("DeleteId");
+        appcan.locStorage.remove("DeleteId");
+        var deleteId = GetMyGuid(friendUserName);
+        var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+        var Url = apiConfig.DeleteContact.Url;
+        var Type = apiConfig.DeleteContact.Type;
+        var parameters = { "userName": userName, "friendUserName": deleteId };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            data: '{"userName":"' + userName + '", "friendUserName":"' + deleteId + '"}',
+            dataType: "json",
+            contentType: "application/json; charset = utf-8",
+            success: function (data) {
+                if (data.ReturnCode == 0) {
+                    isSuccess = 1;
+                    //var deleteContactId = "#Contact"+friendUserName;
+                    //$(deleteContactId).remove();
+                    var allContacts = JSON.stringify(appcan.locStorage.val("AllContacts"));
+                    for (var i in allContacts) {
+                        if (allContacts[i].FriendUserId == friendUserName) {
+                            allContacts.splice(i, 1);
+                            appcan.locStorage.setVal("AllContacts", allContacts);
+                        }
+                    }
+                    //appcan.window.openToast(" 删除成功！", 3000);
+                    uexWindow.evaluateScript("MainTab", 0, "Refresh()");
+                }
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                    appcan.window.openToast(" 删除失败！", 3000);
+                }
+            }
+        });
+    }
+
+    function DeleteGroup(groupId) {
+        var deleteGroupId = "#group" + groupId;
+        $(deleteGroupId).remove();
+        appcan.window.openToast(" 删除成功！", 3000);
+    }
+
+    function LongPressEvent() {
+        $(".singleContact").longTap(function () {
+            $(this).addClass("btn-act2");
+            setTimeout("RemoveClass ()", 300);
+            var deleteId = $(this).attr("id");
+            deleteId = deleteId.substring(7, deleteId.length);
+            appcan.locStorage.setVal("DeleteId", deleteId);
+            appcan.locStorage.setVal("MessageIdFrom", "MyContact");
+            var myId = appcan.locStorage.val("MyUserID");
+            if (myId != deleteId) {
+                appcan.window.popoverElement({
+                    id: 'PopOverContent',
+                    url: 'ChatWindow/PopOverContent.html'
+                });
+            }
+        });
+    }
+
+    function DeleteConfirm() {
+        appcan.window.confirm({
+            title: '提示',
+            content: '确认删除？',
+            buttons: ['确定', '取消'],
+            callback: function (err, data, dataType, optId) {
+                if (data == "0") {
+                    DeleteContact();
+                }
+            }
+        });
+    }
+
+    function GetMyGuid(userName) {
+        var allContacts = JSON.parse(appcan.locStorage.val("AllContacts"));
+        for (var i in allContacts) {
+            if (allContacts[i].UserName == userName) {
+                return allContacts[i].FriendUserId;
+            }
+        }
+    }
+
+    function SearchContactData(userId) {
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetContactInfo.Url;
+        var Type = apiConfig.GetContactInfo.Type;
+        var parameters = { "userId": userId };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        var defer = $.Deferred();
+        $.ajax({
+            url: url,
+            type: Type,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                defer.resolve(data);
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                    appcan.window.openToast("Error!", 2000);
+                }
+            }
+        });
+        return defer.promise();
+    }
+
+    //学校组织结构
+    var branch = '';
+    function ShowSchoolOrganization(schoolId, schoolName, schoolIcon) {
+        if (schoolIcon == '') {
+            schoolIcon = 'MyContactContent/css/myImg/avr.png';
+        }
+        var html = '';
+        html += '<li class="ubb ub bc-border bc-text ub-ac lis groupContact cg" id="schoolOrganization" schoolId="' + schoolId + '">';
+        html += '<div class="lis-icon-s ub-img groupIcon" style="background-image: url(' + schoolIcon + '); "></div>';
+        html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">' + schoolName + '</div>';
+        html += '<div class="fa fa-angle-right ulev2 sc-text"></div>';
+        html += '</li>';
+        $(".allGroup").prepend(html);
+        ClickEvent();
+    }
+    function GetSchoolOrganization() {
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetSchoolMessage.Url;
+        var Type = apiConfig.GetSchoolMessage.Type;
+        var parameters = { "SchoolId": "" };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            dataType: "json",
+            success: function (data) {
+                var schoolName = data.SchoolName,
+                        schoolIcon = data.SchoolIcon,
+                        schoolId = data.SchoolId;
+                branch = data.Branch;
+                ShowSchoolOrganization(schoolId, schoolName, schoolIcon);
+                isSuccess = 1;
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                    appcan.window.openToast("Error!", 2000);
+                }
+            }
+        });
+    }
+</script>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/ui-box.css">
+    <link rel="stylesheet" href="../css/ui-base.css">
+    <link rel="stylesheet" href="../css/ui-color.css">
+    <link rel="stylesheet" href="../css/appcan.icon.css">
+    <link rel="stylesheet" href="../css/appcan.control.css">
+    <link rel="stylesheet" href="DemoListContent/css/main.css">
+    <link rel="stylesheet" href="../css/animate.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div id="xingeDemo" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-order umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+            信鸽推送Demo
+        </div>
+    </div>
+    <div id="loadingPageDemo" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-wallet umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+            启动页Demo
+        </div>
+    </div>
+    <div id="ScannerDemo" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-message umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+            扫码功能
+        </div>
+    </div>
+    <div id="Banner" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-favorite umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+                                    滚动Banner
+        </div>
+    </div>
+    <div id="UploaderMgr" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-pwdprotection umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+                                    文件上传
+        </div>
+    </div>
+    <div id="DownloaderMgr" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-order umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+                                    文件下载
+        </div>
+    </div>
+    <div id="AliPay" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img  res-wallet umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+                                    支付宝支付
+        </div>
+    </div>
+    <div id="PictureView" class="DemoDiv ub ub-f1 c-wh t-bla uinn-m ubb-m ub-ac">
+        <div class="ub-img res-wallet umwh-m animated jello"></div>
+        <div class="ub-f1 uinn-mtxt ut-s animated tada">
+            图片浏览
+        </div>
+    </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+</body>
+<script>
+    appcan.ready( function () {
+        $( ".DemoDiv" ).on( "touchstart", function () {
+            $( this ).removeClass( "animated flipInX" );
+        } );
+
+        $( ".DemoDiv" ).on( "touchend", function () {
+            $( this ).addClass( "animated flipInX" );
+            var DemoID = $( this ).attr( "id" );
+            switch ( DemoID ) {
+                case "xingeDemo":
+                    appcan.window.open( "XingeDemo", "DemoList/XingeDemo.html", 5 );
+                    break;
+                case "loadingPageDemo":
+                    appcan.window.open( "LoadingPageDemoList", "DemoList/LoadingPageDemoList.html", 5 );
+                    break;
+                case "ScannerDemo":
+                    appcan.window.open( "Scanner", "DemoList/Scanner.html", 5 );
+                    break;
+                case "Banner":
+                    appcan.window.open( "Banner", "DemoList/Banner.html", 5 );
+                    break;
+                case "UploaderMgr":
+                    appcan.window.open( "UploaderMgr", "DemoList/uexUploaderMgr.html", 5 );
+                    break;
+                case "DownloaderMgr":
+                    appcan.window.open( "DownloaderMgr", "DemoList/uexDownloaderMgr.html", 5 );
+                    break;
+                case "AliPay":
+                    appcan.window.open( "AliPay", "DemoList/uexAliPay.html", 5 );
+                    break;
+                case "PictureView":
+                    appcan.window.open( "PictureView", "DemoList/PictureView.html", 5 );
+                    break;
+            }
+        } )
+    } )
+</script>
+</html>

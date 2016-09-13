@@ -1,0 +1,30 @@
+.backpicture{
+	background-image:url('myImg/backpicture.png');
+}
+.t-gra
+{
+	color:gray;
+}
+.t-bg{
+	color:#434343;
+}
+.ulh-a{
+	line-height:1.4em;
+}
+
+.bottom{
+	border-bottom:1px solid gray;
+}
+
+.tdPadding{
+	padding-left: 2px;
+}
+
+#EmailDetails td{
+	vertical-align:top;
+	margin:3px;
+}
+
+#ChaoSong{
+	padding-left: 0px!important;
+}

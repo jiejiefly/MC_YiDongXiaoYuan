@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html ng-app ng-controller="contactController"
+      class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>添加日常表现选择学生浮动窗口，获取改班级学生列表</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../css/ui-box.css">
+    <link rel="stylesheet" href="../../../css/ui-base.css">
+    <link rel="stylesheet" href="../../../css/ui-color.css">
+    <link rel="stylesheet" href="../../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../../css/appcan.control.css">
+    <link rel="stylesheet" href="AddresserListContent/css/main.css">
+</head>
+<body class="um-vp bc-bg">
+<div id="divLoading" class="ub-f1">
+    <div class="loading">
+        <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+    </div>
+</div>
+<div id="listContent" style="display: none;">
+    <div id="divContent" class="c-wh">
+        <div ng-repeat="letter in ContactCodes" ng-cloak>
+            <div id="{{letter}}" class="uinn3 sc-bg bc-text toupper">{{letter}}</div>
+            <ul class="uinn-a7">
+                <li class="ubb ub bc-border bc-text ub-ac lis singleContact" ng-repeat="contact in EmailContacts"
+                    ng-if="contact.Code==letter ">
+                    <div class="lis-icon-s ub-img"
+                         style="background-image: url('AddresserListContent/css/myImg/NoContactIcon.png')"
+                         ng-if="contact.Avatar==''"></div>
+                    <div class="lis-icon-s ub-img" style="background-image: url('{{contact.Avatar}}')"
+                         ng-if="contact.Avatar!=''"></div>
+                    <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 NickName" AddresserId="{{contact.AddresserId}}">
+                        {{contact.NickName}}
+                    </div>
+                    <div class="checkbox umar-r">
+                        <input AddresserId="{{contact.AddresserId}}" type="checkbox" class="uabs ub-con" />
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="indexBar ub ub-ver">
+        <div>A</div>
+        <div>B</div>
+        <div>C</div>
+        <div>D</div>
+        <div>E</div>
+        <div>F</div>
+        <div>G</div>
+        <div>H</div>
+        <div>I</div>
+        <div>J</div>
+        <div>K</div>
+        <div>L</div>
+        <div>M</div>
+        <div>N</div>
+        <div>O</div>
+        <div>P</div>
+        <div>Q</div>
+        <div>R</div>
+        <div>S</div>
+        <div>T</div>
+        <div>U</div>
+        <div>V</div>
+        <div>W</div>
+        <div>X</div>
+        <div>Y</div>
+        <div>Z</div>
+    </div>
+</div>
+<script src="../../../js/appcan.js"></script>
+<script src="../../../js/appcan.control.js"></script>
+<script src="../../../js/appcan.listview.js"></script>
+<script src="../../../js/angular.min.js"></script>
+<script src="../../../js/Common.js"></script>
+</body>
+<script>
+    appcan.ready(function () {
+        $("#divLoading").hide();
+        $("#listContent").show();
+        $(".uinn-a7 li").on("touchstart", function () {
+            $(this).addClass("sc-bg-active");
+            setTimeout("$('.uinn-a7 li').removeClass('sc-bg-active');", 300);
+        });
+
+        var x = parseInt($('#divContent').offset().width); //480
+        var em = $('#divContent').css('font-size');//24px
+        var w = 1.5 * parseInt(em);//1.4 * 24
+        var h = appcan.getLocVal('AddresserListHeight') + "px";//622
+
+        $(".indexBar").css({
+            position: "fixed",
+            top: "0",
+            left: (x - w) + "px",
+            height: h,
+            width: w + "px",
+            "z-index": "99999"
+        });
+        //$(".indexBar").css("z-index","99999");
+        $(".indexBar div").addClass("ub-f1").css({"text-align": "center"});
+
+        $(".indexBar div").on("touchstart", function () {
+            $(".indexBar").addClass("sc-bg-active");
+            var txt = $(this).html();
+            if (txt == "↑") location.href = "#addContact";
+            else location.href = "#" + txt;
+        });
+
+        $(".indexBar").on("touchmove", function () {
+            event.preventDefault();
+            var touch = event.touches[0];
+            var touchY = touch.pageY;
+            var childLen = $(".indexBar div").length;
+            var indexBarH = $(".indexBar").offset().height;
+            var txt;
+            var minY;
+            var maxY;
+
+            $(".indexBar div").each(function (i) {
+
+                minY = i * (indexBarH / childLen) + 1;
+                maxY = (i + 1) * (indexBarH / childLen);
+                if (touchY >= minY && touchY <= maxY) {
+                    txt = $(this).html();
+                    if (txt == "↑") location.href = "#addContact";
+                    else location.href = "#" + txt;
+                    return false;
+                }
+            });
+
+            if (txt != undefined) {
+                appcan.window.openToast("  " + txt + "  ", 9000000);
+            }
+
+        });
+        $(".indexBar").on("touchend", function () {
+            $('.indexBar').removeClass('sc-bg-active');
+            appcan.window.closeToast();
+        });
+
+        $(".singleContact").on("click", function () {
+            var singleContact = $(this).find("input");
+            singleContact[0].checked = !singleContact[0].checked;
+        });
+        $("input").on("click",function(){
+            $(this)[0].checked = !$(this)[0].checked;
+        })
+    });
+
+    var ClassID = appcan.locStorage.val("ClassID");
+    function contactController($scope) {
+        var isSuccess = 0;
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var type = apiConfig.GetEmailContact.Type;
+        var url = apiConfig.GetEmailContact.Url;
+        var parameters = {"classId": ClassID};
+        url = GetMappingUrl(url, parameters);
+        $.ajax({
+            url: url,
+            type: type,
+            async: false,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                appcan.locStorage.setVal("EmailContacts", data);
+                $scope.EmailContacts = data;
+                $scope.$apply();
+            },
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+                    var LatestTopOneContactsData = appcan.getLocVal("EmailContacts");
+                    var LatestTopOneContacts = JSON.parse(LatestTopOneContactsData);
+                    $scope.EmailContacts = LatestTopOneContacts;
+                    $scope.$apply();
+                }
+            }
+        });
+        $scope.ContactCodes = [];
+        DistinctCode($scope.EmailContacts);
+        function DistinctCode(Contacts) {
+            for (var j = 0; j < Contacts.length; j++) {
+                var contact = Contacts[j].Code;
+                if ($scope.ContactCodes.indexOf(contact) < 0) {
+                    $scope.ContactCodes.push(contact);
+                }
+            }
+        }
+    };//控制器结束
+
+    $(function () {
+        $("ul li:last-child").css({"border-bottom": "#FFFFFF"});
+    });
+
+    function Confirm(){
+        var addresserArr =[];
+        $("input").each(function(){
+            if($(this).attr("checked")){
+                addresserArr.push($(this).attr("AddresserId"));
+            }
+        });
+        appcan.locStorage.val("AddresserArr",addresserArr);
+
+        appcan.frame.evaluateScript({
+            name:'EditEmail',
+            popName:'content',
+            scriptContent:'AddAddresserAndCC()'
+        });
+    }
+
+</script>
+</html>

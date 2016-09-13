@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.tab.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/project/new.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+<div class="conbor uof">
+    <div class="consj"> 
+        <div class="ulev2 uin9">下载功能</div>
+        <div class="umh1"></div>
+        <div class="uin10">下载路径：</div> 
+        <div class="ubb ubt bc-border bc-bg tcxx breakword" id="data"></div> 
+        <div class="umh1"></div>
+        <div class="uin">
+            <div class="ub btn bc-text-head bc-btn ub-ac ub-pc" id="down" > 下载</div>
+        </div>
+         
+        <div class="umh1"></div>
+        <div id="status" class="uhide">
+           <div class="uba  bc-border bc-bg  breakword umh1" >
+            <div class="umh1 bc-head"style="width: 0%" id="percentage"></div>
+        </div> 
+       <div class="umh1"></div>
+        <div id="per" class="tx-c">
+            0%
+        </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+<div class="ub  ub-fv">
+    <div>
+</div>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>	
+<script src="../../js/appcan.tab.js"></script>
+</body>
+<script>
+var downloadpath = 'http://pic.pp3.cn/uploads//20121001j/bz/201.jpg';
+var savedPath = 'wgt://data/down/1284565199.jpg'
+appcan.ready(function(){
+	appcan.initBounce();
+	uexDevice.cbGetInfo=function (opCode,dataType,data){
+        var device = eval('('+data+')');
+        var connectStatus=device.connectStatus;
+        if(connectStatus!=null&&connectStatus.length>0){
+            if(connectStatus==-1){
+                alert('网络错误');  
+            }
+        }
+    }
+    uexDevice.getInfo('13');
+	uexDownloaderMgr.onStatus = function(opCode,fileSize,percent,status){
+                switch (status) {
+                    case 0:
+                        $('#percentage').css("width",percent+"%");
+                        $('#per').html(percent+"%");
+                        if(parseInt(percent)==100){
+                            $('#down').html('下载');
+                            $('#status')[0].className="uhide";
+                            isDown = false;
+                        }
+                        break;
+                    case 1:
+                        alert("下载完成");
+                        $('#down').html('下载');
+                        $('#status')[0].className="uhide";
+                        isDown = false;
+                        uexDownloaderMgr.closeDownloader(opCode);
+                       clearInfo();
+                        break;
+                    case 2:
+                        alert("下载失败");
+                        $('#down').html('下载');
+                        $('#status')[0].className="uhide";
+                        isDown = false;
+                        uexDownloaderMgr.closeDownloader(opCode);
+                        break;
+
+                }
+    
+        }
+        uexDownloaderMgr.cbCreateDownloader = function(opCode,dataType,data){
+            switch(dataType){
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                  if(data == 0){
+                    uexDownloaderMgr.download(inOpCode,downloadpath,savedPath,'1');
+                    }else{
+                    }
+                break;
+                default:
+                  break;
+          }        
+        }
+
+        uexWidgetOne.cbError = function(opCode,errorCode,errorInfo){
+                alert(errorInfo);
+        }
+        
+})
+var isDown = false;
+ appcan.button(".btn", "btn-act", function() {
+            if(isDown){
+                closeDownload();
+                $('#down').html('下载');
+                $('#status')[0].className="uhide";
+                isDown = false;
+            }else{
+                download();
+                $('#down').html('取消');
+                $('#status')[0].className="uinn";
+                isDown = true;
+            }
+        })
+    var inOpCode = 1;
+    
+    function download(){
+        uexDownloaderMgr.createDownloader(inOpCode);    
+    }
+    
+    function closeDownload(){
+            uexDownloaderMgr.closeDownloader(inOpCode);
+    }
+    function clearInfo(){
+        uexDownloaderMgr.clearTask(downloadpath,"1");
+    }
+    
+        </script>
+</html>

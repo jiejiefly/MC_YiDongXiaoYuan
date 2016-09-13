@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html ng-app="ContactsAngular" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>组织结构联系人浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="../MyContactContent/css/main.css"/>
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div class="c-wh contacts" ng-controller="ContactsController">
+            <ul class="uinn-a8">
+                <label class="line_checkbox" ng-repeat="contact in contacts">
+                    <li class="ubb ub bc-border bc-text ub-ac lis singleContact cg" id="{{contact.ContactId}}" >
+                        <div class="lis-icon-s ub-img" style="background-image: url(../MyContactContent/css/myImg/NoContactIcon.png)" ng-if="contact.ContactIcon==null||contact.ContactIcon==''"></div>
+                        <div class="lis-icon-s ub-img" style="background-image: url('{{contact.PortraitUri}}')" ng-if="contact.ContactIcon!=null&&contact.ContactIcon!=''"></div>
+                        <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 contactName">{{contact.ContactName}}</div>
+                        <div class="checkbox umar-r-checkbox" ng-if="showCheckbox=='yes'"><input type="checkbox" class="uabs ub-con" userName = "{{contact.ContactId}}"></div>
+                    </li>
+                </label>
+            </ul>
+        </div>
+    </body>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/Common.js"></script>
+    </body>
+    <script>
+        var checkFromSchoolOrganization = appcan.locStorage.val("CheckFromSchoolOrganization");
+        var contactsModule = angular.module('ContactsAngular', []);
+        contactsModule.controller('ContactsController',['$scope', function ($scope) {
+            GetContactsData($scope);
+            if(checkFromSchoolOrganization == "1"){
+                $scope.showCheckbox = "yes";
+            }
+        }]);
+
+        var globalContactsArray = '';
+        appcan.ready(function() {
+            if(checkFromSchoolOrganization == "1"){
+                $(".checkbox").show();
+                appcan.window.evaluateScript("SchoolOrganizationContacts", "ShowNavRight ()");
+                GetAddContactsArray ();
+            }
+        });
+
+        function GetContactsData ($scope) {
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetContactsList.Url;
+            var Type = apiConfig.GetContactsList.Type;
+            var parameters = {"GroupId": ""};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    $scope.contacts = data;
+                    $scope.$apply();
+                    ClickLineCheckbox ();
+                    var checkFromSchoolOrganization = appcan.locStorage.val("CheckFromSchoolOrganization");
+                    if(checkFromSchoolOrganization != "1"){
+                        ClickEvent ();
+                    }
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("Error!", 2000);
+                    }
+                }
+            });
+        }
+
+        function ClickEvent () {
+            $(".singleContact").on('click', function () {
+                var contactId = $(this).attr("id");
+                var contactName = $(this).find(".contactName").html();
+                var schoolOrganizationContact = {"Name":contactName, "ID":contactId};
+                appcan.locStorage.setVal("SchoolOrganizationContact", schoolOrganizationContact);
+                appcan.window.open("SchoolOrganizationContactDetail", "SchoolOrganizationContactDetail.html", 2);
+            });
+        }
+
+        function ClickLineCheckbox () {
+            //点击一行选中、取消checkbox
+            $("#line_checkbox").on('click', function () {
+                var chk = $(this).find("input[type='checkbox']").attr("checked");
+                if(chk == undefined){
+                    $(this).find("input[type='checkbox']").attr("checked");
+                }else{
+                    $(this).find("input[type='checkbox']").removeAttr("checked");
+                }
+            });
+
+            $(".singleContact").on('click', function () {
+                $(this).addClass("btn-act2");
+                setTimeout("RemoveClass ()", 200);
+            })
+        }
+
+        function RemoveClass () {
+            $(".singleContact").removeClass("btn-act2");
+        }
+
+        function GetAddContactsArray () {
+            var userNameList = new Array();
+            $("input[type='checkbox']").change(function(){
+                var isRepeat = false;
+                var userName = $(this).attr("userName");
+                var groupMembers = eval('(' + appcan.locStorage.val("GroupMembers") + ')');
+                for(var i in groupMembers){
+                    if(groupMembers[i].UserName == userName){
+                        isRepeat = true;
+                    }
+                }
+                if(isRepeat == false){
+                    var index = userNameList.indexOf(userName);
+                    if(index == -1){
+                        userNameList.push(userName);
+                    }else{
+                        userNameList.splice(index, 1);
+                    }
+                    globalContactsArray = JSON.stringify(userNameList);
+                }
+            });
+        }
+
+        function SubmitContactsToGroup () {
+            var contactArray = globalContactsArray;
+            var groupId = appcan.locStorage.val("GroupId");
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+            var Url = apiConfig.AddContactsToGroup.Url;
+            var Type = apiConfig.AddContactsToGroup.Type;
+            var isSuccess = 0;
+            if(contactArray == ''){
+                appcan.window.evaluateScript("AddMembersToGroup", "CloseWindow ()");
+            }else{
+                $.ajax({
+                    url: Url,
+                    type: Type,
+                    data:'{"GroupId":"'+ groupId +'", "Users":'+ contactArray +'}',
+                    dataType:"json",
+                    contentType:"application/json; charset = utf-8",
+                    success:function(data){
+                        isSuccess = 1;
+                    },
+                    complete:function(){
+                        if(isSuccess == 0){
+                            alert(" 添加失败！");
+                        }else{
+                            appcan.frame.evaluateScript("ChatroomCenter", "content", "ShowGroupMembers()");
+                            appcan.window.evaluateScript("AddMembersToGroup", "CloseWindow ()");
+                            appcan.frame.evaluateScript("ChatroomCenter", "content", "TipInfo ()");
+                            appcan.window.evaluateScript("SchoolOrganizationGroups","CloseWindow()");
+                            appcan.locStorage.remove("CheckFromSchoolOrganization");
+                            appcan.window.evaluateScript("SchoolOrganizationContacts", "CloseWindow ()");
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</html>

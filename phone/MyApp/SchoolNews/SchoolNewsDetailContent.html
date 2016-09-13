@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html ng-app="SchoolNewsDetailApp" ng-controller="SchoolNewsDetailController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="SchoolNewsDetailContent/css/main.css">
+</head>
+<body class="ub um-vp bc-bg ub-ver uinn" style="margin:0 0.8em 0 0.8em;" ontouchstart>
+    <div id="divLoading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="divContent" style="display:none; padding:0.625em 0;">
+        <div class="t-bg tx-l uinn" id="Title">{{NData.Title}}</div>
+        <div class="t-gra tx-l ulev-1 uinn uamr-t" style="border-bottom:1px solid#ffffff;" id="Time">{{NData.Date|date : 'yyyy-MM-dd HH:mm'}}</div>
+        <div class="ub-img uamr-t uinn" style="min-height:10.2em;" id="newspic">
+            <img src={{NData.Picture}} class="newspic">
+        </div>
+        <div class="t-gra tx-l ulev-app1 ulh-a uamr-t uinn" id="Content" ng-bind-html="NData.Content|to_trusted"></div>
+    </div>
+</body>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>
+<script src="../../js/angular.min.js"></script>
+<script>
+    appcan.ready(function () {
+        //appcan.initBounce();
+        $("#divLoading").hide();
+        $("#divContent").show();
+
+    });
+    //内容过滤器
+    var schoolNewsDetailApp = angular.module("SchoolNewsDetailApp", []);
+
+    schoolNewsDetailApp.controller("SchoolNewsDetailController", function ($scope) {
+        var NewsData = JSON.parse(appcan.locStorage.val("NEWS_DETAIL"));
+        $scope.NData = NewsData;
+    });
+
+    schoolNewsDetailApp.filter('to_trusted', ['$sce', function ($sce) {
+        return function (text) {
+            return $sce.trustAsHtml(text);
+        };
+    }]);
+    //function SchoolNewsDetailController($scope) {
+    //    var NewsData = JSON.parse(appcan.locStorage.val("NEWS_DETAIL"));
+    //    $scope.NData = NewsData;
+    //}
+</script>
+</html>
+

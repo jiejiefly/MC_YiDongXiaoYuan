@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>组织结构分组浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="../MyContactContent/css/main.css"/>
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div class="c-wh">
+            <ul class="uinn-a8 allGroup"></ul>
+        </div>
+    </body>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/Common.js"></script>
+    </body>
+    <script>
+        appcan.ready(function() {
+            GetGroupsData ('ta001');
+        });
+
+        function GetGroupsData (GroupId) {
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            if(GroupId == 'ta001'){
+                var Url = apiConfig.GetGroup1List.Url;
+                var Type = apiConfig.GetGroup1List.Type;
+            }else if (GroupId == 'teacher001' || GroupId == 'student001'){
+                var Url = apiConfig.GetGroup2List.Url;
+                var Type = apiConfig.GetGroup2List.Type;
+            }
+            var parameters = {"GroupId": ""};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    ShowGroups (data);
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("Error!", 2000);
+                    }
+                }
+            });
+        }
+
+        function ShowGroups (groups) {
+            var html = '';
+            for(var i in groups){
+                var groupId = groups[i].GroupId,
+                groupName = groups[i].GroupName,
+                groupIcon = groups[i].GroupIcon,
+                branch = groups[i].Branch;;
+                if(groupIcon == ""){groupIcon="../MyContactContent/css/myImg/avr.png";}
+                html += '<li class="ubb ub bc-border bc-text ub-ac lis groupContact cg" id="'+ groupId +'" branch="'+branch+'">';
+                html += '<div class="lis-icon-s ub-img groupIcon" style="background-image: url('+ groupIcon +'); "></div>';
+                html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">'+ groupName +'</div>';
+                html += '<div class="fa fa-angle-right ulev2 sc-text"></div>';
+                html += '</li>';
+            }
+            $(".allGroup").html(html);
+            ClieckEvent ();
+        }
+
+        function ClieckEvent () {
+            $(".groupContact").on('tap', function () {
+                $(this).addClass("btn-act2");
+                setTimeout("RemoveClass ()", 200 );
+                var groupId = $(this).attr("id");
+                var branch = $(this).attr("branch");
+                var groupName = $(this).find(".groupName").html();
+                var str = {"Name":groupName,"ID":groupId};
+                var schoolOrganizationArray = JSON.parse(appcan.locStorage.val("SchoolOrganizationArray"));
+                schoolOrganizationArray.push(str);
+                appcan.locStorage.setVal("SchoolOrganizationArray", schoolOrganizationArray);
+                if (branch == 'groups'){
+                    GetGroupsData(groupId);
+                    appcan.window.evaluateScript("SchoolOrganizationGroups", "WindowName ()");
+                }else{
+                    appcan.window.open("SchoolOrganizationContacts","SchoolOrganizationContacts.html", 2);
+                }
+            });
+        }
+
+        function RemoveClass () {
+            $(".groupContact").removeClass("btn-act2");
+        }
+    </script>
+</html>

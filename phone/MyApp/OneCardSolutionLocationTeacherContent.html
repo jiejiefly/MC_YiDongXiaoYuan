@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>定位搜索-教师版</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/ui-box.css">
+    <link rel="stylesheet" href="../css/ui-base.css">
+    <link rel="stylesheet" href="../css/ui-color.css">
+    <link rel="stylesheet" href="../css/appcan.icon.css">
+    <link rel="stylesheet" href="../css/appcan.control.css">
+    <link rel="stylesheet" href="OneCardSolutionLocationTeacherContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div class="ub ub-ver">
+        <!--列表-->
+        <div class="ub ub-ver uinn-a1 ub-f1">
+            <ul class="ubb ub bc-border t-bla ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    姓名
+                </li>
+                <div class="sc-bg-active uinput ub ub-f1  bc-border uba">
+                    <input id="Name" placeholder="请输入姓名" type="text" class="ub-f1">
+                </div>
+            </ul>
+            <ul class="ubb ub bc-border t-bla ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    学号
+                </li>
+                <div class="sc-bg-active uinput ub ub-f1  bc-border uba">
+                    <input id="StudentNumber" placeholder="请输入学号" type="text" class="ub-f1">
+                </div>
+            </ul>
+            <ul class="ubb ub bc-border  ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    卡号
+                </li>
+                <div class="sc-bg-active uinput ub ub-f1  bc-border uba">
+                    <input id="CardNumber" placeholder="请输入卡号" type="text" class="ub-f1">
+                </div>
+            </ul>
+            <ul id="Department" class="ubb ub bc-border  ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    部门
+                </li>
+                <li id="DepartmentName" class="tx-r ulev-app1 t-gra4">
+                    请选择
+                </li>
+                <li class="ulev2 fa fa-angle-right t-gra4"></li>
+            </ul>
+            <ul class="ubb ub bc-border  ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    身份类别
+                </li>
+                <li>
+                    <div class="select t-gra4 bc-border bc-text">
+                        <div class="text selectBoxStyle">
+                            请选择
+                        </div>
+                        <select id="select" selectedindex="0">
+                            <option value=0>请选择</option>
+                            <option value=1>教师</option>
+                            <option value=2>学生</option>
+                        </select>
+                    </div>
+                </li>
+            </ul>
+            <ul id="Status" class="ubb ub bc-border  ub-ac uinn-a9">
+                <li class="ub-f1 ut-s t-gra4 ulev-app1">
+                    状态
+                </li>
+                <li id="StatusName" class="tx-r ulev-app1 t-gra4">
+                    请选择
+                </li>
+                <li class="ulev2 fa fa-angle-right t-gra4"></li>
+            </ul>
+            <div uinn uinn-at1">
+                <div class="btn ub ub-ac bc-text-head ub-pc bc-btn" id="searchBtn">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/appcan.listview.js"></script>
+    <script src="../js/jquery.min.js"></script>
+</body>
+<script>
+    appcan.ready(function () {
+        appcan.initBounce();
+         
+    });
+    appcan.select(".select", function (ele, value) {
+        //alert(value);
+        //console.log(value);
+    });
+
+    $("#searchBtn").on("click", function () { 
+        var name = $("#Name").val().trim();
+        var studentNumber = $("#StudentNumber").val().trim();
+        var cardNumber = $("#CardNumber").val().trim();
+        var statusName = $("#StatusName").html().trim();
+        var departmentName = $("#DepartmentName").html().trim();
+        var type = $("#select option:selected").text();
+        if (name == "" && studentNumber == "" && cardNumber == "" && statusName == "请选择" && departmentName == "请选择" && type == "请选择") {
+            appcan.window.openToast("请至少选择一项查询", 2000);
+        }//if
+        else {
+            appcan.window.openToast("查询中");
+            var isSuccess = 0;
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Type = apiConfig.GetLocationDetail.Type;
+            var url = apiConfig.GetLocationDetail.Url;
+            var searchText = { "Name": name, "StudentNumber": studentNumber, "CardNumber": cardNumber, "StatusName": statusName, "Type": type, "DepartmentName": departmentName };
+            $.ajax({
+                url: url,
+                type: Type,
+                data: searchText,
+                dataType: "json",
+                success: function (data) {
+                    isSuccess = 1;
+                    appcan.setLocVal("LocationDetail", data);   
+                    appcan.window.open("LocationInfoList", "OneCardSolution/LocationInfoList.html", 5);
+                },
+                complete: function (xhr, type, error) {
+                    appcan.window.closeToast();
+                    if (isSuccess == 0) {
+                        alert("发生未知错误，请稍后重试！");
+                    }
+                }
+            });//ajax
+        }
+    });
+
+    //部门选择
+    $("#Department").on("click", function () {
+        appcan.window.open("Department", "OneCardSolution/Department.html", 5);        
+    });
+    //状态选择
+    $("#Status").on("click", function () {
+        appcan.window.open("PositionStatus", "OneCardSolution/PositionStatus.html", 5);   
+    });
+    //部门
+    function AddDepartment() {
+        //alert(12);
+        var department = JSON.parse(appcan.locStorage.val("Department"));
+        $("#DepartmentName").html(department.Name);
+        $("#DepartmentName").attr("DepartmentId", department.ID);
+    }
+    //状态
+    function AddStatus() {
+        var status = JSON.parse(appcan.locStorage.val("Status"));
+        $("#StatusName").html(status.Name);
+        $("#StatusName").attr("StatusId", status.ID);
+    }
+</script>
+</html>

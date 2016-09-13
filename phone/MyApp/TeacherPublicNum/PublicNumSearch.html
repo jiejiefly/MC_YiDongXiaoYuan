@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html ng-app="" ng-controller="PublicNumSearchController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/animate.css">
+    <link rel="stylesheet" href="PublicNumSearchContent/css/main.css">
+</head>
+<body class="um-vp " ontouchstart >
+    <div id="page_0" class="up ub ub-ver bc-bg" tabindex="0">
+        <!--header开始-->
+        <div id="header" class="uh bc-text-head ub bc-head">
+            <div class="nav-btn" id="nav-left">
+                <div class="fa fa-angle-left fa-2x"></div>
+            </div>
+            <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">
+                <div class=" bc-head uinput ub ub-f1 ubb">
+                    <div class="uinn fa fa-search"></div>
+                    <input placeholder="搜索" type="text" class="ub-f1 bc-text-head" style="outline:none;" id="searchBox" ng-model="DName">
+                </div>
+            </h1>
+        </div>
+        <!--header结束-->
+        <!--content开始-->
+        <div id="content" class="ub-f1 tx-l">
+            <div class="ub ub-ver c-wh  uinn-a7" id="">
+                <ul id="choosed" style="display:none;">
+                    <li class="ubb ub bc-border bc-text ub-ac lis choosedPublicNum" ng-repeat="data in SearchData | filter:DName" id="{{data.ID}}">
+                        <div ng-if="data.Icon != ''"><img src="{{data.Icon}}" class="lis-icon-s1"></div>
+                        <div ng-if="data.Icon == ''"><img src="PublicNumSearchContent/css/image/NoContactIcon.png" class="lis-icon-s1"></div>
+                        <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 publicNumName">{{data.PublicNumName}}</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--content结束-->
+
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/angular.min.js"></script>
+</body>
+<script>
+    appcan.ready(function () {
+
+        $("input").focus();
+
+        $('#searchBox').bind('input propertychange', function () {
+            var Text = $("#searchBox").val();
+            if (Text == "") {
+                $("#choosed").hide();
+            } else {
+                $("#choosed").show().addClass("animated pulse");
+            }
+        });
+        $('#searchBox').bind('', function () { $("#choosed").hide(); });
+
+        appcan.button(".choosedPublicNum", "btn-act2", function () {
+            var PublicNumID = $(this).attr("id");
+            var PublicNumName = $(this).find(".publicNumName").html();
+            appcan.locStorage.setVal("PublicNumName", PublicNumName);
+            appcan.locStorage.setVal("PublicNumID", PublicNumID);
+            appcan.window.open("PublicNumMsg", "PublicNumMsg.html", 2);
+        });
+    });
+
+    function PublicNumSearchController($scope) {
+        var SearchData = appcan.locStorage.val("PUBLIC_NUM_CONTACT_DATA");
+        SearchData = JSON.parse(SearchData);
+        $scope.SearchData = SearchData;
+    }
+
+    appcan.button("#nav-left", "btn-act", function () {
+        appcan.window.close(-1);
+    })
+
+</script>
+</html>

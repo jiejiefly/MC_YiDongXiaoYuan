@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="EmailContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div class="ub ub-ver uinn-m">
+            <div ng-app="EmailGroupModule" ng-controller="EmailGroupController" class="uinn-mr ub ub-ver uc-a1 c-wh">
+                <div ng-repeat="data in EmailGroupData" EmailGroupId="data.EamilGroupId" class="EmailGroup ub ub-f1 c-wh t-bla ubb-m ub-ac">
+                    <div class="ub-img res-message umwh-m"></div>
+                    <div class="EmailGroupName ub-f1 uinn-mtxt ut-s" ng-bind="data.EmailGroupName"></div>
+                    <div class="ulev-4 bc-text-head sc-bg-alert tab_badge1 UnReadCount" ng-if="data.UnReadCount != ''" ng-bind="data.UnReadCount"></div>
+                    <div class="ub-img res-arrow3 umw1 umh1"></div>
+                </div>
+            </div>
+        </div>
+        <script src="../js/appcan.js"></script>
+        <script src="../js/appcan.control.js"></script>
+        <script src="../js/Common.js"></script>
+        <script src="../js/angular.min.js"></script>
+    </body>
+    <script>
+
+        var email = angular.module("EmailGroupModule", []);
+        email.controller("EmailGroupController", function($scope) {
+            appcan.ready(function() {
+                GetEamilGroup($scope);
+                Refresh($scope);
+            });
+        });
+
+        function ClickEvent(){
+            $(".EmailGroup").on("click",function(){
+                var EmailGroupId = $(this).attr("id");
+                var EmailGroupName = $(this).find(".EmailGroupName").html();
+                appcan.locStorage.val("EmailGroupId",EmailGroupId);
+                appcan.locStorage.val("EmailGroupName",EmailGroupName);
+                appcan.window.open("EmailList", "Email/EmailList.html", 5);
+                $(this).find(".UnReadCount").remove();
+            });
+        }
+
+        function GetEamilGroup($scope){
+            var isSuccess = 0;
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var getEmailGroupUrl = apiConfig.GetEmailGroup.Url;
+            var getEmailGroupType = apiConfig.GetEmailGroup.Type;
+            var getEmailGroupParameters = {"accessToken": token};
+            getEmailGroupUrl = GetMappingUrl(getEmailGroupUrl, getEmailGroupParameters);
+            $.ajax({
+                url: getEmailGroupUrl,
+                type: getEmailGroupType,
+                data: getEmailGroupParameters,
+                dataType: "json",
+                success: function (msg) {
+                    isSuccess = 1;
+                    $scope.EmailGroupData = msg;
+                    $scope.$apply();
+                    ClickEvent();
+                },
+                complete: function (xhr, status) {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("获取邮件分组失败！", 1000);
+                        isSuccess = 0;
+                    }
+                }
+            });//ajax结束
+        }
+
+        function Refresh($scope){
+            appcan.frame.setBounce(0, function (type) {
+            }, function (type) {
+                GetEamilGroup($scope);
+            }, function (type) {
+                setTimeout(function (type) {
+                    appcan.frame.resetBounce(type);
+                }, 1000);
+            })
+        }
+
+    </script>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html ng-app="" ng-controller="AddPublicNumController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>查找公众号浮动窗口</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/animate.css">
+    <link rel="stylesheet" href="AddPublicNumContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div>
+        <div class=" ub uinn ub-ver c-wh ">
+            <div class="ub ub-pj">
+                <div class="ub ub-f4 ub-pj ubb">
+                    <div>
+                        <div class=" uinput ub bc-border ub-ac">
+                            <input placeholder="查找公众号" type="text" class="" id="textSearch" size="30" style="outline:none;">
+                        </div>
+                    </div>
+                    <!--<div class="bc-text">-->
+                    <!--<div class="ub-img icon-close umw2 umh4"></div>-->
+                    <!--</div>-->
+                </div>
+                <div class="ub ub-pe umar-l">
+                    <div class="btn ub ub-ac bc-text-head ub-pc bc-btn uc-a1 ulev-1" id="btn_Search">查找</div>
+                </div>
+            </div>
+            <div class="sc-text ulev-1 umar-t">关注名师公众号，获取更多服务和资讯</div>
+        </div>
+        <div class=""  >
+            <div id="NoData" style="display:none; text-align:center; margin-top:5em;" class="sc-text">无数据</div>
+            <div class="ub ub-ver c-wh">
+                <ul id="AddPublicNumList" style="display:none;">
+                    <li class=" animated flipInX ubb ub bc-border bc-text ub-ac lis choosedPublicNum" ng-repeat="data in AddPublicNumData" id="{{data.ID}}">
+                        <div ng-if="data.Icon != ''"><img src="{{data.Icon}}" class="lis-icon-s1"></div>
+                        <div ng-if="data.Icon == ''"><img src="PublicNumSearchContent/css/image/NoContactIcon.png" class="lis-icon-s1"></div>
+                        <div class="ub-f1">
+                            <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 publicNumName">{{data.PublicNumName}}</div>
+                            <div class="marg-l ub ut-m ulev-1 sc-text umar-t txtH-v">{{data.PublicNumBrief}}</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/angular.min.js"></script>
+    <script src="../../js/Common.js"></script>
+</body>
+<script>
+    var NoData = 0;
+    appcan.ready(function () {
+        
+    }); 
+
+    function AddPublicNumController($scope) {
+        appcan.button("#btn_Search", "ani-act", function () {
+            appcan.window.openToast("加载中...");
+            var PublicNumKeyword = $("#textSearch").val().trim();
+            GetAddPublicNumList(PublicNumKeyword);
+            if (NoData == 1) {
+                $("#NoData").show();
+            } else {
+                $("#AddPublicNumList").show();
+            }
+            var bindData = appcan.locStorage.val("ADD_PUBLIC_NUM_DATA");
+            bindData = JSON.parse(bindData);
+            $scope.AddPublicNumData = bindData;
+            $scope.$apply();
+            appcan.window.closeToast();
+            //查找公众号后，当点击时获取所点击的公众号的id和name并存储
+            appcan.button(".choosedPublicNum", "btn-act2", function () {
+                var PublicNumID = $(this).attr("id");
+                var PublicNumName = $(this).find(".publicNumName").html();
+                appcan.locStorage.setVal("PublicNumName", PublicNumName);
+                appcan.locStorage.setVal("PublicNumID", PublicNumID);
+                var ClickData = GetDataByPublicNumID(PublicNumID);
+                appcan.locStorage.setVal("FROM_ADD_PUBLIC_NUM_PAGE", "Yes");
+                if (ClickData.IsPayAttention == "No") {
+                    appcan.window.open("AddPublicNumDetail", "AddPublicNumDetail.html", 2);
+                } else {
+                    appcan.window.open("PublicNumCenter", "PublicNumCenter.html", 2);
+                }
+            });
+        });
+    }
+    
+    // 获取公众号列表
+    function GetAddPublicNumList(PublicNumKeyword) {
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.locStorage.val("ApiConfig"));
+        var Url = apiConfig.GetAddPublicNum.Url;
+        var Type = apiConfig.GetAddPublicNum.Type;
+        var parameters = {'Token':token, 'PublicNumKeyword': PublicNumKeyword };
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            async: false,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                // alert(url);
+                isSuccess = 1;
+                if (data.res_code == undefined) {
+                    if (data == "") {
+                        $scope.NoData = 1;
+                    } else {
+                        appcan.locStorage.setVal("ADD_PUBLIC_NUM_DATA", data);
+                    }
+                }
+                else if (data.res_code == "0") { }
+                else if (data.res_code == "-1") {
+                    //-1表示Token无效
+                    alert("请重新登录！");
+
+                    appcan.window.evaluateScript({
+                        name: "MainTab",
+                        scriptContent: "ExitSys()"
+                    });
+
+                }
+                else {
+                    appcan.window.openToast({
+                        msg: data.res_message,
+                        duration: 2000,
+                        position: 5,
+                        type: 0
+                    });
+                }
+            },
+
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+                    appcan.ready(function () {
+                        appcan.window.openToast({
+                            msg: '加载最新数据失败',
+                            duration: 2000,
+                            position: 5,
+                            type: 0
+                        });
+                    });
+                }
+            }
+        });
+    }
+    
+    // 增加关注公众号
+    function GetDataByPublicNumID(PublicNumID) {
+        var AddPublicNumData = JSON.parse(appcan.locStorage.val("ADD_PUBLIC_NUM_DATA"));
+        for (var i in AddPublicNumData) {
+            if (AddPublicNumData[i].ID == PublicNumID) {
+                appcan.locStorage.setVal("AddPublicNumCenterData", AddPublicNumData[i]);
+                return AddPublicNumData[i];
+            }
+        }
+    }
+</script>
+</html>

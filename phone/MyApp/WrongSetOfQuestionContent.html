@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html ng-app ng-controller = "WrongSetOfQuestionController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>错题集浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="WrongSetOfQuestionContent/css/main.css">
+        <script></script>
+    </head>
+    <body class="um-vp bc-bg">
+        <div id="divLoading" class="ub-f1">
+            <div class="loading">
+                <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+            </div>
+        </div>
+        <div id="divContent" style="display:none; padding:0.625em 0;">
+            <div class="uinn-a7">
+                <div class = "ub ub-pj umar-t">
+                    <div id = "Chinese" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>语文</div>
+                        <div class = "chinese">(0)</div>
+                    </div>
+                    <div id = "Math" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>数学</div>
+                        <div class = "math">(0)</div>
+                    </div>
+                    <div id = "English" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>英语</div>
+                        <div class = "english">(0)</div>
+                    </div>
+                </div>
+                <div class = "ub ub-pj umar-t">
+                    <div id = "Politics" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>政治</div>
+                        <div class = "politics">(0)</div>
+                    </div>
+                    <div id = "History" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>历史</div>
+                        <div class = "history">(0)</div>
+                    </div>
+                    <div id = "Geography" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>地理</div>
+                        <div class = "geography">(0)</div>
+                    </div>
+                </div>
+                <div class = "ub ub-pj umar-t">
+                    <div id = "Physics" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>物理</div>
+                        <div class = "physics">(0)</div>
+                    </div>
+                    <div id = "Chemistry" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>化学</div>
+                        <div class = "chemistry">(0)</div>
+                    </div>
+                    <div id = "Biology" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>生物</div>
+                        <div class = "biology">(0)</div>
+                    </div>
+                </div>
+                <div class="ub ub-pj umar-t">
+                    <div id = "Other" class="btnSubject uinn-sea3-2 uba-sea3 umar-at1 uc-a1 ufl ulev-1 c-bg-white circle-lr tx-c ub ub-pc">
+                        <div>其他</div>
+                        <div class = "other">(0)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/Common.js"></script>
+    </body>
+    <script>
+        appcan.ready(function() {
+            GetWrongQuestionNumBySubject();
+            var data = appcan.locStorage.val("SUBJECTLOCDATA");
+            data = JSON.parse(data);
+            for(var i in data){
+                switch(data[i].Subject){
+                       case "语文":
+                            $(".chinese").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "数学":
+                            $(".math").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "英语":
+                            $(".english").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "政治":
+                            $(".politics").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "历史":
+                            $(".history").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "地理":
+                            $(".geography").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "物理":
+                            $(".physics").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "化学":
+                            $(".chemistry").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       case "生物":
+                            $(".biology").html('(' + data[i].ErrorCount + ')');
+                            break;
+                       default:
+                            $(".other").html('(' + data[i].ErrorCount + ')');
+                            break;
+                }
+            }
+            $("#divLoading").hide();
+            $("#divContent").show();
+        });
+        
+        function GetWrongQuestionNumBySubject(){
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetErrorCountBySubject.Url;
+            var Type = apiConfig.Notice.Type;
+            var parameters = {"Token": token};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url:url,
+                type: Type,
+                async: false,
+                data: parameters,
+                dataType: "json",
+                success: function (data) {
+                    isSuccess = 1;
+                    if(data.res_code == undefined){
+                        appcan.locStorage.setVal("SUBJECTLOCDATA", data);
+                    }
+                    else if(data.res_code == "0") { }
+                    else if (data.res_code == "-1") {
+                        //-1表示Token无效
+                        alert("请重新登录！");
+                        appcan.window.evaluateScript({
+                            name: "MainTab",
+                            scriptContent: "ExitSys()"
+                        });
+
+                    }else { alert(data.res_message);}
+                },
+                complete: function (xhr, type, error) {
+                    if(isSuccess == 0){
+                        appcan.ready(function() {
+                            appcan.window.openToast({
+                                msg:'加载最新数据失败',
+                                duration:2000,
+                                position:5,
+                                type:0
+                            });
+                        });
+                    }
+                }
+            });
+        }
+        
+        appcan.button(".btnSubject", "btn-act2", function() {
+            switch(this.id){
+                case 'Chinese':
+                    var errorCount = $(this).find(".chinese").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "语文");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Math':
+                    var errorCount = $(this).find(".math").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "数学");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'English':
+                    var errorCount = $(this).find(".english").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "英语");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Politics':
+                    var errorCount = $(this).find(".politics").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "政治");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'History':
+                    var errorCount = $(this).find(".history").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "历史");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Geography':
+                    var errorCount = $(this).find(".geography").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "地理");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Physics':
+                    var errorCount = $(this).find(".physics").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "物理");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Chemistry':
+                    var errorCount = $(this).find(".chemistry").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "化学");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                case 'Biology':
+                    var errorCount = $(this).find(".biology").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "生物");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                default:
+                    var errorCount = $(this).find(".other").html();
+                    if(errorCount != "(0)"){
+                        appcan.locStorage.setVal("SUBJECT", "其他");
+                        appcan.window.open("WrongSetOfTest", "WrongSetOfQuestion/WrongSetOfTest.html", 2);
+                    }
+                    break;
+                
+            }
+            
+        });
+    </script>
+</html>

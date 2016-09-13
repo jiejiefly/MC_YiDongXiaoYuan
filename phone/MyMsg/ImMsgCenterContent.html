@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="ImMsgCenterContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div id="divLoading" class="ub-f1">
+            <div class="loading">
+                <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+            </div>
+        </div>
+        <div id = "divContent" style="display:none;">
+            <div class="ub ub-ver c-wh" id="forumList"></div>
+        </div>
+        <script src="../js/appcan.js"></script>
+        <script src="../js/appcan.control.js"></script>
+        <script src="../js/jquery.min.js"></script>
+        <script src="../js/Common.js"></script>
+    </body>
+    <script>
+        var name;
+        appcan.ready(function() {
+            uexEasemob.getRecentChatters();
+            $("#divContent").show();
+            $("#divLoading").hide();
+            ClickEvent();
+        });
+
+        function ChatContentList (data) {
+            //alert("ChatContentList ==>"+JSON.stringify(data));
+            if(data.length>0){
+                var html = '';
+                for(var i in data){
+                    var head = '';
+                    var chatType = data[i].chatType;
+                    var chatter = data[i].chatter;
+                    if(chatType == 0){
+                        SearchContactData (chatter);
+                        var groupId = '';
+                    }else{
+                        var plat = uexWidgetOne.platformName;
+                        if(plat == "android"){
+                            name = chatter;
+                            var groupId = data[i].lastMsg.to;
+                        }else{
+                            name = data[i].groupName;
+                            var groupId = data[i].chatter;
+                        }
+                    }
+                    var unreadMsgCounter = data[i].unreadMsgCount;
+                    var lastMsgContent = data[i].lastMsg.messageBody.text;
+                    var lastMsgTime = data[i].lastMsg.messageTime;
+                    html += '<div class="recentChatList ubb ub bc-border" chatter = "' + chatter + '" chatType = "' + chatType +'" chatName = "'+ name +'" groupId = "'+ groupId +'">';
+                    //html += 'chatType = ' + chatType + '">';
+                    html += '<ul ontouchstart="appcan.touch(' + "btn-act" + ')" class=" ub uinn-a1 c-wh2 ub-f1">';
+                    html += '<li class="ub pos_re">';
+                    html += '<div class="uh-app3 uw-app3 uc-a-app2 ub-img mar-ar1" style="background-image:url('+ '../MyContactContent/css/myImg/NoContactIcon.png' + ');"></div>';
+                    if(unreadMsgCounter != 0){
+                        html += '<span class = "hide"><div class="unreadMsgCounter pos-infor ub-ac ub-pc ub uc-a-infor2 umh1 umw1 c-wh2">';
+                        html += '<div class="uwh-infor c-blu3 uc-a-infor bc-text-head ulev-4 ub-ac ub-pc ub">';
+                        html +=  unreadMsgCounter + '</div></div></span>';
+                    }
+                    html += '</li><li class="ub-f1 ub">';
+                    html += '<div class="ub ub-ver ub-f1 umar-r-infor">';
+                    html += '<div class="t-bla ulev-app1">' + name + '</div>';
+                    html += '<div class="t-gra-infor2 ulev-4 ub-f1 umar-t">';
+                    var messageType = data[i].lastMsg.messageType;
+                    if(messageType == "text"){
+                        html += lastMsgContent;
+                    }else if(messageType == "image"){
+                        html += '<div class="fa fa-image fa-2x"></div>';
+                    }else if(messageType == "audio"){
+                        html += '<img src="ImMsgCenterContent/css/myImg/audio.png" class = "img-audio" alt="语音"/>';
+                    }else if(messageType == "location"){
+                        html += '<img src="ImMsgCenterContent/css/myImg/location.png" class = "img-location" alt="位置"/>';
+                    }
+                    html += '</div></div>';
+                    html += '<div class="ub-pe t-gre-infor ulev-2">' + ConversDate(lastMsgTime);
+                    html += '</div></li>';
+                    html += '</ul>';
+                    html += '<div style = "display: none;">';
+                    html += '<div class="umar-l-infor uw-infor1 ub ub-ac ub-pc c-blu-infor1">';
+                    html += '<div class="umw1 umh1 ub-img del-infor"></div>';
+                    html += '</div></div></div>';
+                }
+                $("#forumList").html(html).addClass("c-wh");
+                ClickEvent();
+            }else{
+                $("#forumList").append('<div class = "tx-c uinn sc-text" style = "margin-top: 3em;">无数据</div>').removeClass("c-wh");
+            }
+        }
+        //时间戳转化为标准时间
+            function ConversDate(timestamp) {
+                //return new Date(parseInt(timestamp)).toLocaleString().replace(/:\d{1,2}$/,' ');
+                var d = new Date(parseInt(timestamp));//根据时间戳生成的时间对象
+                var year = d.getFullYear();
+                var month = d.getMonth()+1;
+                var day = d.getDate();
+                var hours = d.getHours();
+                var minutes = d.getMinutes();
+                if(minutes < 10){minutes = "0" + minutes;}
+                var date = year + "-" + month + "-" + day + " " + hours +":" + minutes;
+                return date;
+            }
+
+            function ClickEvent(){
+                appcan.button(".recentChatList", "btn-act", function(){
+                    //$(this).find(".unreadMsgCounter").hide();
+                    $(this).find(".hide").hide();
+                    var chatter = $(this).attr("chatter");
+                    var chatType = $(this).attr("chatType");
+                    var chatName = $(this).attr("chatName");
+                    var groupId = $(this).attr("groupId");
+                    if(chatType == '0'){
+                        uexEasemob.resetUnreadMsgCount('{"username":"'+chatter+'", "chatType":"0"}');
+                        appcan.locStorage.setVal("Name", chatName);
+                        appcan.locStorage.setVal("UserName", chatter);
+                        appcan.window.open("Chatboard", "../ChatWindow/Chatboard.html", 10);
+                    }else{
+                        uexEasemob.resetUnreadMsgCount('{"username":"'+groupId+'", "chatType":"1"}');
+                        appcan.locStorage.setVal("GroupName", chatName);
+                        appcan.locStorage.setVal("EaseMobId", groupId);
+                        appcan.window.open("Chatroom", "../ChatWindow/Chatroom.html", 10);
+                    }
+                    uexEasemob.getTotalUnreadMsgCount();
+
+                    //控制消息页左上和左下消息总数量
+                    appcan.window.publish("TaskData2","");
+                });
+            }
+
+            function SearchContactData (userId) {
+                //var defer = $.Deferred();
+                var token = appcan.locStorage.val("Token");
+                var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+                var Url = apiConfig.GetContactInfo.Url;
+                var Type = apiConfig.GetContactInfo.Type;
+                var parameters = {"userId": userId};
+                var url = GetMappingUrl(Url, parameters);
+                var isSuccess = 0;
+                $.ajax({
+                    url: url,
+                    type: Type,
+                    async: false,
+                    dataType: "json",
+                    contentType: "application/json; charset = utf-8",
+                    success: function (data) {
+                        name = data.Result.Name;
+                        isSuccess = 1;
+                        //defer.resolve(data);
+                    },
+                    complete: function () {
+                        if (isSuccess == 0) {
+                            
+                        }
+                    }
+                });
+                //return defer.promise();
+            }
+    </script>
+</html>

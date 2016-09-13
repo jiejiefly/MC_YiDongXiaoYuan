@@ -1,0 +1,76 @@
+
+.c-wh{
+    background-color: white;
+}
+
+.loading{text-align:center;padding-top: 4.75em;}
+.index-bc{background-color:white;}
+
+.umar-v {margin:0.25em 0.625em 0.75em 0.625em;}
+.txt-v {color:#000;font-weight:bold;}
+.txtH-v { overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;-webkit-box-orient: vertical;}
+
+.txtH-v2{
+    position:relative;
+    line-height:1.4em;
+    /* 3 times the line-height to show 3 lines */
+    height:4.2em;
+    overflow:hidden;
+}
+.txtH-v2::after {
+    content:"...";
+    font-weight:bold;
+    position:absolute;
+    bottom:0;
+    right:0;
+    padding:0 20px 1px 45px;
+    background:url(http://css88.b0.upaiyun.com/css88/2014/09/ellipsis_bg.png) repeat-y;
+}
+.newspic{
+    width: 100%;
+    height: 10em;
+}
+.fontSize{
+    font-size: 90%;
+    line-height: 120%
+ 
+}
+.btn-act2{
+    background-color: #E0E0E0;
+}
+.umar-t1{
+    margin-top:1em;
+}
+.umar-t2{
+    margin-top:2em;
+}
+.umar-b1{
+    margin-bottom:1em;
+}
+.uinn-lr{
+    padding: 0.5em 0 0.5em 0;
+}
+.umar-max14{
+    max-width: 14em;
+    max-height: 2em;
+}
+.uinn-diy1 {
+    padding: 0.5em 0.5em 0.5em 0.5em;
+}
+.textOnPic{
+    background-color: black;
+    opacity: 0.6;
+    padding: 0.2em 0.2em 0.2em 0.2em;
+    width: 97.6%;
+    max-width: 97.5%;
+}
+.divCenter {  
+    padding:0.8em 0 0.8em 0;  
+} 
+.txtH-v { 
+        overflow : hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+}

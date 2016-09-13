@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html ng-app ng-controller="PublicNumController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>名师公众号消息浮动窗口</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/animate.css">
+    <link rel="stylesheet" href="PublicNumMsgContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div id="divLoading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="divContent" style="display:none; padding:0.625em 0;">
+        <div class="bc-bg" id="NoData" ng-if="NoData==1">
+            <div class="NoDataImg_box ">
+                <div class="NoDataImg_bg"></div>
+            </div>
+            <div class="NoData_box NoData_color">抱歉，暂时没有您要查看的数据！</div>
+        </div>
+        <div class="umar-b animated bounceIn" ng-repeat="data in NData">
+            <!-- 第一次关注公众号的提示消息开始 -->
+            <div class="umar-b" ng-if="data.FirstAttention=='true'">
+                <div class="tx-c sc-text ulev-1">{{data.MessageDate|date : 'yyyy-MM-dd HH:mm'}}</div>
+                <div class="ub umar-v uc-a1 ub-f1">
+                    <div class="">
+                        <img src="{{bindData.Icon}}" class="circle-icon">
+                    </div>
+                    <div class="uba bc-border c-wh uc-a1 uinn7 umar-max15">
+                        <div class="umar-b">
+                            <div class="ulev0 txtH-v">{{data.Title}}</div>
+                        </div>
+                        <div class="umar-b umar-t" ng-repeat="dl in data.Content">{{dl.list}}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 第一次关注公众号的提示消息结束 -->
+            <!-- 单条消息开始 -->
+            <div ng-if="data.IsMore == 'N'">
+                <div class="tx-c sc-text ulev-1">{{data.MessageDate|date : 'yyyy-MM-dd HH:mm'}}</div>
+                <div class="singleMsg uba bc-border c-wh umar-v uc-a1 uinn2" messageid="{{data.MessageID}}" newsid="{{data.MessageContent[0].NewsId}}">
+                    <ul>
+                        <li class="umar-t">
+                            <div class="ulev0 txt-v">{{data.MessageContent[0].Title}}</div>
+                        </li>
+                        <li class="sc-text ulev-1 umar-b umar-t">{{data.MessageContent[0].Date|date : 'yyyy-MM-dd'}}</li>
+                        <li class="umar-t1">
+                            <div class="ub-img" style="text-align: center;">
+                                <img src={{data.MessageContent[0].Picture}} class="newspic">
+                            </div>
+                        </li>
+                        <li class="umar-t1">
+                            <div class="ut-m txtH-v fontSize sc-text">{{data.MessageContent[0].Summary}}</div>
+                        </li>
+                        <!--<li class="ubt bc-border umar-b umar-t"></li>-->
+                        <li class="ub ub-ac fontSize">
+                            <div class="ub-f1 marg-l ub ub-ver ut-m txt-v umar-t2 umar-b">查看详情</div>
+                            <!--<div class="fa fa-angle-right ulev2 sc-text"></div>-->
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 单条消息结束 -->
+            <!-- 多条消息开始 -->
+            <div ng-if="data.IsMore == 'Y'">
+                <div class="tx-c sc-text ulev-1">{{data.MessageDate|date : 'yyyy-MM-dd HH:mm'}}</div>
+                <div class=" uba bc-border c-wh umar-v uc-a1">
+                    <div ng-repeat="datacontent in data.MessageContent">
+                        <div>
+                            <ul class="moreMsg uinn-diy1" messageid="{{data.MessageID}}" newsid="{{datacontent.NewsId}}" ng-if="datacontent.NewsId == data.MessageContent[0].NewsId">
+                                <li>
+                                    <div class="ub-img" style="text-align: center; position: relative;">
+                                        <img src={{data.MessageContent[0].Picture}} class="newspic">
+                                        <div class="textOnPic tx-l ut-s" style="position: absolute; z-index: 2;left: 1px; bottom: 0.28em;">
+                                            <span class="bc-text-head">{{datacontent.Title}}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="moreMsg uinn-diy1 ubt bc-border ub ub-pj uinn-lr" messageid="{{data.MessageID}}" newsid="{{datacontent.NewsId}}" ng-if="datacontent.NewsId != data.MessageContent[0].NewsId">
+                                <li class="umar-max14 divCenter uof-y txtH-v">{{datacontent.Title}}</li>
+                                <li>
+                                    <img src={{datacontent.Picture}} style="width: 3.5em; height: 3.5em; vertical-align: middle;">
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 多条消息结束 -->
+        </div>
+        <div id = "appendContent"></div>
+    </div>
+    <div style="position:fixed; top:90%;right:0;">
+        <!-- <div id="fixedButton" class="bc-head uinn bc-text-head" style="opacity:0.6;border-radius:0.8em;">输入</div> -->
+    </div>
+    <div id="bottom"></div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/angular.min.js"></script>
+    <script src="../../js/Common.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+</body>
+<script>
+    //该变量用于判断公众号是否是第一次被关注
+    var IsFirst = appcan.locStorage.val("IS_FIRST");
+    appcan.ready(function () {
+        $("#divLoading").hide();
+        $("#divContent").show();
+        window.location.hash = "#bottom";
+        ClickEvent();
+    });
+
+    function PublicNumController($scope) {
+        if (IsFirst == "true") {
+            $scope.bindData = GetClickPublicNumData();
+            GetFirstAttentionMsg($scope);
+        } else {
+            GetPublicNumMsgList($scope);
+        }
+        appcan.locStorage.remove("IS_FIRST");
+    }
+
+    //获取公众号消息列表
+    function GetPublicNumMsgList($scope) {
+        var token = appcan.locStorage.val("Token");
+        var PublicNumID = appcan.locStorage.val("PublicNumID");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetPublicNumMsg.Url;
+        var Type = apiConfig.GetPublicNumMsg.Type;
+        var parameters = { 'Token': token , 'PublicNumID': PublicNumID};
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            async: false,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                if (data.res_code == undefined) {
+                    if (data == "") {
+                        $scope.NoData = 1;
+                        $scope.$apply();
+                    } else {
+                        appcan.locStorage.setVal("DATA", data);
+                        $scope.NData = data;
+                    }
+                }
+                else if (data.res_code == "0") { }
+                else if (data.res_code == "-1") {
+                    //-1表示Token无效
+                    alert("请重新登录！");
+
+                    appcan.window.evaluateScript({
+                        name: "MainTab",
+                        scriptContent: "ExitSys()"
+                    });
+
+                }
+                else {
+                    appcan.window.openToast({
+                        msg: data.res_message,
+                        duration: 2000,
+                        position: 5,
+                        type: 0
+                    });
+                }
+
+            },
+
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+                    appcan.ready(function () {
+                        appcan.window.openToast({
+                            msg: '加载最新数据失败',
+                            duration: 2000,
+                            position: 5,
+                            type: 0
+                        });
+                    });
+                }
+            }
+        });
+    }
+
+    //获取点击消息的详细内容
+    function SearchClickNews(MessageId, NewsId) {
+        var MessageData = JSON.parse(appcan.locStorage.val("DATA"));
+        for (var i in MessageData) {
+            if (MessageData[i].MessageID == MessageId) {
+                var NewsData = MessageData[i].MessageContent;
+                for (var j in NewsData) {
+                    if (NewsData[j].NewsId == NewsId) {
+                        appcan.locStorage.setVal("NEWS_DETAIL", NewsData[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    //第一次关注公众号时执行此函数
+    function GetFirstAttentionMsg($scope) {
+        var token = appcan.locStorage.val("Token");
+        var PublicNumID = appcan.locStorage.val("PublicNumID");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetPublicNumFirstAttention.Url;
+        var Type = apiConfig.GetPublicNumFirstAttention.Type;
+        var parameters = { 'Token': token, 'PublicNumID': PublicNumID};
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            async: false,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                if (data.res_code == undefined) {
+                    if (data == "") {
+                        $scope.NoData = 1;
+                        $scope.$apply();
+                    } else {
+                        appcan.locStorage.setVal("DATA", data);
+                        $scope.NData = data;
+                    }
+                }
+                else if (data.res_code == "0") { }
+                else if (data.res_code == "-1") {
+                    //-1表示Token无效
+                    alert("请重新登录！");
+
+                    appcan.window.evaluateScript({
+                        name: "MainTab",
+                        scriptContent: "ExitSys()"
+                    });
+
+                }
+                else {
+                    appcan.window.openToast({
+                        msg: data.res_message,
+                        duration: 2000,
+                        position: 5,
+                        type: 0
+                    });
+                }
+
+            },
+
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+                    appcan.ready(function () {
+                        appcan.window.openToast({
+                            msg: '加载最新数据失败',
+                            duration: 2000,
+                            position: 5,
+                            type: 0
+                        });
+                    });
+                }
+            }
+        });
+    }
+
+    
+    //判断点击的是哪个公众号及该公众号是否是第一次关注
+    //并通过公众号ID获取该公众号的相关信息
+    function GetClickPublicNumData() {
+        var PublicNumData;
+        if (IsFirst == "true") {
+            PublicNumData = JSON.parse(appcan.locStorage.val("ADD_PUBLIC_NUM_DATA"));
+        } else {
+            PublicNumData = JSON.parse(appcan.locStorage.val("PUBLIC_NUM_CONTACT_DATA"));
+        }
+        var PublicNumID = appcan.locStorage.val("PublicNumID");
+        for (var i in PublicNumData) {
+            if (PublicNumData[i].ID == PublicNumID) {
+                return PublicNumData[i];
+            }
+        }
+    }
+
+    //点击菜单拉取消息（通过菜单ID来判断点击的是哪个菜单）
+    function GetPullingData(menuId) {
+        appcan.window.openToast("加载中...");
+        var token = appcan.locStorage.val("Token");
+        var PublicNumID = appcan.locStorage.val("PublicNumID");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetPullingData.Url;
+        var Type = apiConfig.GetPullingData.Type;
+        var parameters = { 'Token': token, 'PublicNumID': PublicNumID, 'MenuID': menuId};
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+
+        $.ajax({
+            url: url,
+            type: Type,
+            async: false,
+            data: parameters,
+            dataType: "json",
+            success: function (data) {
+                isSuccess = 1;
+                var Data = JSON.parse(appcan.locStorage.val("DATA"));
+                Data.push(data);
+                appcan.locStorage.setVal("DATA", Data);
+                if (data.res_code == undefined) {
+                    if (data.IsMore == 'Y') {
+                        var Date = data.MessageDate.replace("T", " ");
+                        Date = Date.substring(0, 16);
+                        var temp = '<div class="tx-c sc-text ulev-1">'+Date+'</div>';
+                        temp += '<div class="uba bc-border c-wh umar-v uc-a1">';
+                        var datacontent = data.MessageContent;
+                        var firstNewsId = data.MessageContent[0].NewsId;
+                        var messageid = data.MessageID;
+                        var divID = messageid + Math.random();
+                        var firstImgSrc = data.MessageContent[0].Picture;
+                        for (var i in datacontent) {
+                            var newsid = datacontent[i].NewsId;
+                            var imgSrc = datacontent[i].Picture;
+                            var title = datacontent[i].Title;
+                            temp += '<div class = "animated bounceIn" id = ' + divID + '>';
+                            if (firstNewsId == newsid) {
+                                temp += '<div><ul class="moreMsg uinn-diy1" messageid=' + messageid + ' newsid=' + newsid + ' >';
+                                temp += '<li><div class="ub-img" style="text-align: center; position: relative;">';
+                                temp += '<img src=' + firstImgSrc + ' class="newspic">'
+                                temp += '<div class="textOnPic tx-l ut-s" style="position: absolute; z-index: 2;left: 1px; bottom: 0.28em;">';
+                                temp += '<span class="bc-text-head">' + title + '</span></div></div><li></ul>';
+                            } else if (firstNewsId != newsid) {
+                                temp += '<ul class="moreMsg uinn-diy1 ubt bc-border ub ub-pj uinn-lr" messageid=' + messageid + ' newsid=' + newsid + '>';
+                                temp += '<li class="umar-max14 divCenter uof-y txtH-v">' + title + '</li>';
+                                temp += ' <li><img src=' + imgSrc + ' style="width: 3.5em; height: 3.5em; vertical-align: middle;"></li></ul></div></div></div>';
+                            }
+                        }
+                        $("#appendContent").append(temp);
+                        window.location.hash = "#" + divID;
+                        appcan.window.closeToast();
+                        ClickEvent();
+                        
+                    } else if (data.IsMore == 'N') {
+                        var Date = data.MessageDate.replace("T", " ");
+                        Date = Date.substring(0, 16);
+                        var messageid = data.MessageID;
+                        var divID = messageid + Math.random();
+                        var newsid = data.MessageContent[0].NewsId;
+                        var subDate = data.MessageContent[0].Date.replace("T", "").substring(0, 16);
+                        var title = data.MessageContent[0].Title; 
+                        var imgSrc = data.MessageContent[0].Picture;
+                        var content = data.MessageContent[0].Summary;
+                        var temp = '<div class = "animated bounceIn" id = ' + divID + '><div class="tx-c sc-text ulev-1">' + Date + '</div>';
+                        temp += '<div class="singleMsg uba bc-border c-wh umar-v uc-a1 uinn2" messageid=' + messageid + ' newsid='+newsid+'>';
+                        temp += '<ul><li class="umar-t"><div class="ulev0 txt-v">' + title + '</div></li>';
+                        temp += '<li class="sc-text ulev-1 umar-b umar-t">' + subDate +' </li>';
+                        temp += '<li class="umar-t1"><div class="ub-img" style="text-align: center;">';
+                        temp += '<img src=' + imgSrc + ' class="newspic"></div></li>';
+                        temp += '<li class="umar-t1"><div class="ut-m txtH-v fontSize sc-text">' + content + '</div></li>';
+                        temp += '<li class="ub ub-ac fontSize">';
+                        temp += '<div class="ub-f1 marg-l ub ub-ver ut-m txt-v umar-t2 umar-b">查看详情</div>';
+                        temp += '</li></ul></div>';
+
+                        $("#appendContent").append(temp);
+                        window.location.hash = "#" + divID;
+                        appcan.window.closeToast();
+                        ClickEvent();
+
+                    } else{
+                        var Date = data.MessageDate.replace("T", " ");
+                        Date = Date.substring(0, 16);
+                        var imgSrc = appcan.locStorage.val("PublicNumIcon");
+                        if(imgSrc == undefined){
+                            imgSrc = "../TeacherPublicNumContent/css/myImg/NoContactIcon.png";
+                        }
+                        //alert(imgSrc);
+                        var title = data.Title;
+                        var contentList = data.Content;
+                        var divID = "div" + Math.random();
+                        var temp = '<div class = "animated bounceIn" id = ' + divID + '><div class="umar-b">';
+                        temp += '<div class="tx-c sc-text ulev-1">' + Date + '</div>';
+                        temp += '<div class="ub umar-v uc-a1 ub-f1">';
+                        temp += '<div class="">';
+                        temp += '<img src=' + imgSrc + ' class="circle-icon"></div>';
+                        temp += '<div class="uba bc-border c-wh uc-a1 uinn7 umar-max15">';
+                        temp += '<div class="umar-b">';
+                        temp += '<div class="ulev0 txtH-v">' + title + '</div></div>';
+                        for(var i in contentList){
+                            var list = contentList[i].list;
+                            temp += '<div class="umar-b umar-t">' + list + '</div>';    
+                        }
+                        
+                        temp += '</div></div></div></div>';
+
+                        $("#appendContent").append(temp);
+                        window.location.hash = "#" + divID;
+                        appcan.window.closeToast();
+                    }
+                }
+                else if (data.res_code == "0") { }
+                else if (data.res_code == "-1") {
+                    //-1表示Token无效
+                    alert("请重新登录！");
+
+                    appcan.window.evaluateScript({
+                        name: "MainTab",
+                        scriptContent: "ExitSys()"
+                    });
+
+                }
+                else {
+                    appcan.window.openToast({
+                        msg: data.res_message,
+                        duration: 2000,
+                        position: 5,
+                        type: 0
+                    });
+                }
+
+            },
+
+            complete: function (xhr, type, error) {
+                if (isSuccess == 0) {
+                    appcan.ready(function () {
+                        appcan.window.openToast({
+                            msg: '加载最新数据失败',
+                            duration: 2000,
+                            position: 5,
+                            type: 0
+                        });
+                    });
+                }
+            }
+        });
+    }
+
+    //点击事件的方法
+    function ClickEvent() {
+        appcan.button(".singleMsg", "btn-act2", function () {
+            var newsId = $(this).attr("newsId");
+            var messageId = $(this).attr("messageId");
+            SearchClickNews(messageId, newsId);
+            appcan.window.open("PublicNumMsgDetail", "PublicNumMsgDetail.html", 2);
+        });
+        appcan.button(".moreMsg", "btn-act2", function () {
+            var newsId = $(this).attr("newsId");
+            var messageId = $(this).attr("messageId");
+            SearchClickNews(messageId, newsId);
+            appcan.window.open("PublicNumMsgDetail", "PublicNumMsgDetail.html", 2);
+        });
+    }
+
+    appcan.button("#fixedButton", "btn-act2", function () {
+
+    });
+    
+</script>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html ng-app ng-controller="ContactsController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>向分组中添加联系人浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="../MyContactContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+    <div id="loading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="show" style="display:none;">
+        <div id="ContactContent">
+            <div id="divContent" class="c-wh">
+                <ul class="uinn-a8 allGroup"></ul>
+                <div class = "friendsContent">
+                    <div ng-repeat="letter in ContactCodes">
+                        <div id="{{letter}}" class="uinn3 sc-bg bc-text" ng-if="letter!=''&&letter!=null">{{letter}}</div>
+                        <ul class="uinn-a8">
+                            <label class="line_checkbox" ng-repeat="contact in Contacts">
+                                <li class="ubb ub bc-border bc-text ub-ac lis singleContact" ng-if="contact.NameSpell[0].toUpperCase()==letter&&contact.Name!=''&&contact.Name!=null " id="Contact{{contact.UserName}}">
+                                    <div class="lis-icon-s ub-img" style="background-image: url(../MyContactContent/css/myImg/NoContactIcon.png)" ng-if="contact.PortraitUri==null||contact.PortraitUri==''"></div>
+                                    <div class="lis-icon-s ub-img" style="background-image: url('{{contact.PortraitUri}}')" ng-if="contact.PortraitUri!=null&&contact.PortraitUri!=''"></div>
+                                    <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 contactName">{{contact.Name}}</div>
+                                    <div class="checkbox umar-r-checkbox"><input type="checkbox" class="uabs ub-con" userName = "{{contact.UserName}}"></div>
+                                </li>
+                            </label>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/Common.js"></script>
+    <script src="../js/jquery.min.js"></script>
+</body>
+    <script>
+        var globalContactsArray = '';
+        appcan.ready(function() {
+            $("#show").show();
+            $("#loading").hide();
+            GetSchoolOrganization ();
+            GetAddContactsArray();
+            ClickEvent ();
+        });
+
+        function ContactsController ($scope) {
+            $scope.ContactCodes = [];
+            var allContacts = JSON.parse(appcan.locStorage.val("AllContacts"));
+            $scope.Contacts = allContacts;
+            $scope.$apply();
+
+            DistinctCode($scope.Contacts);
+            function DistinctCode(Contacts) {
+                for (var i in Contacts) {
+                    var contact = Contacts[i].NameSpell[0].toUpperCase();
+                    if ($scope.ContactCodes.indexOf(contact) < 0) {
+                        $scope.ContactCodes.push(contact);
+                        $scope.$apply();
+                    }
+                }
+            }
+        }
+
+        function GetAddContactsArray () {
+            var userNameList = new Array();
+            $("input[type='checkbox']").change(function(){
+                var isRepeat = false;
+                var userName = $(this).attr("userName");
+                var groupMembers = eval('(' + appcan.locStorage.val("GroupMembers") + ')');
+                for(var i in groupMembers){
+                    if(groupMembers[i].UserName == userName){
+                        isRepeat = true;
+                    }
+                }
+                if(isRepeat == false){
+                    var index = userNameList.indexOf(userName);
+                    if(index == -1){
+                        userNameList.push(userName);
+                    }else{
+                        userNameList.splice(index, 1);
+                    }
+                    globalContactsArray = JSON.stringify(userNameList);
+                }
+            });
+        }
+
+        function SubmitContactsToGroup () {
+            var contactArray = globalContactsArray;
+            var groupId = appcan.locStorage.val("GroupId");
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+            var Url = apiConfig.AddContactsToGroup.Url;
+            var Type = apiConfig.AddContactsToGroup.Type;
+            var isSuccess = 0;
+            if(contactArray == ''){
+                appcan.window.evaluateScript("AddMembersToGroup", "CloseWindow ()");
+            }else{
+                $.ajax({
+                    url: Url,
+                    type: Type,
+                    data:'{"GroupId":"'+ groupId +'", "Users":'+ contactArray +'}',
+                    dataType:"json",
+                    contentType:"application/json; charset = utf-8",
+                    success:function(data){
+                        isSuccess = 1;
+                    },
+                    complete:function(){
+                        if(isSuccess == 0){
+                            alert("error");
+                        }else{
+                            appcan.frame.evaluateScript("ChatroomCenter", "content", "ShowGroupMembers()");
+                            appcan.window.evaluateScript("AddMembersToGroup", "CloseWindow ()");
+                            appcan.frame.evaluateScript("ChatroomCenter", "content", "TipInfo ()");
+                        }
+                    }
+                });
+            }
+        }
+
+        //学校组织结构
+        var branch = '';
+        function ShowSchoolOrganization (schoolId, schoolName, schoolIcon) {
+            if(schoolIcon == ''){
+                schoolIcon = 'MyContactContent/css/myImg/avr.png';
+            }
+            var html = '';
+            html += '<li class="ubb ub bc-border bc-text ub-ac lis groupContact cg" id="schoolOrganization" schoolId="'+schoolId+'">';
+            html += '<div class="lis-icon-s ub-img groupIcon" style="background-image: url('+ schoolIcon +'); "></div>';
+            html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">' + schoolName + '</div>';
+            html += '<div class="fa fa-angle-right ulev2 sc-text"></div>';
+            html += '</li>';
+            $(".allGroup").prepend(html);
+            ClickEvent ();
+        }
+        function GetSchoolOrganization () {
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetSchoolMessage.Url;
+            var Type = apiConfig.GetSchoolMessage.Type;
+            var parameters = {"SchoolId": ""};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    var schoolName = data.SchoolName,
+                            schoolIcon = data.SchoolIcon,
+                            schoolId = data.SchoolId;
+                    branch = data.Branch;
+                    ShowSchoolOrganization (schoolId, schoolName, schoolIcon);
+                    isSuccess = 1;
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("Error!", 2000);
+                    }
+                }
+            });
+        }
+
+        function ClickEvent () {
+            $(".groupContact").on("tap", function(){
+                $(this).addClass("btn-act2");
+                setTimeout("RemoveClass ()", 200 );
+                var schoolName = $(this).find(".groupName").html(),
+                    schoolId = $(this).attr("schoolId");
+                var schoolOrganizationArray = new Array();
+                var str = {"Name": schoolName,"ID":schoolId};
+                schoolOrganizationArray.push(str);
+                appcan.locStorage.setVal("SchoolOrganizationArray", schoolOrganizationArray);
+                var id = $(this).attr("id");
+                (branch == 'groups')?appcan.window.open("SchoolOrganizationGroups","../MyContact/SchoolOrganizationGroups.html", 2):appcan.window.open("SchoolOrganizationContacts","../MyContact/SchoolOrganizationContacts.html", 2);
+                appcan.locStorage.setVal("CheckFromSchoolOrganization", "1");
+            });
+
+            //点击一行选中、取消checkbox
+            $("#line_checkbox").on('click', function () {
+                var chk = $(this).find("input[type='checkbox']").attr("checked");
+                if(chk == undefined){
+                    $(this).find("input[type='checkbox']").attr("checked");
+                }else{
+                    $(this).find("input[type='checkbox']").removeAttr("checked");
+                }
+            });
+
+            $(".singleContact").on('click', function () {
+                $(this).addClass("btn-act2");
+                setTimeout("RemoveClass ()", 200);
+            })
+        }
+
+        function RemoveClass () {
+            $(".singleContact").removeClass("btn-act2");
+            $(".groupContact").removeClass("btn-act2");
+        }
+    </script>
+</html>

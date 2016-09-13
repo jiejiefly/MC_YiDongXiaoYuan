@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html ng-app ng-controller="PublicNumCenterController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>公众号中心浮动窗口</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/animate.css">
+    <link rel="stylesheet" href="AddPublicNumDetailContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div id="loading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="divContent" style="display:none;" class=" animated zoomIn">
+        <div class="ub uinn">
+            <div>
+                <canvas id="PublicNumHeadPic" class="ub-img publicHeadPic" width="100" height="100"></canvas>
+            </div>
+            <div class="ub ub-ver uinn">
+                <div ng-bind="NData.PublicNumName"></div>
+                <div class="sc-text ulev-1">
+                    <span>公众号:</span>
+                    <span ng-bind="NData.PublicNumAccount"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ub ub-ver">
+            <div class="list c-wh">
+                <span class="">功能介绍：</span>
+                <span class="sc-text ulev-1" ng-bind="NData.PublicNumBrief"></span>
+            </div>
+
+            <div class="list c-wh viewHistoryMsg">
+                <span class="">查看历史消息</span>
+            </div>
+
+        </div>
+        <div class="uinn">
+            <div class="btn ub ub-ac bc-text-head ub-pc bc-btn btn_PublicNum" id="btn_intoPublicNum" >关注公众号</div>
+        </div>
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/angular.min.js"></script>
+    <script src="../../js/Common.js"></script>
+</body>
+<script>
+    var imageObj = new Image();
+    imageObj.onload = function () {
+        var pic = $("#PublicNumHeadPic")[0].getContext("2d");
+        pic.width = this.width;
+        pic.height = this.height;
+        pic.drawImage(this, 0, 0, 100, 100);
+    }
+
+    appcan.ready(function () {
+        $("#loading").hide();
+        $("#divContent").show();
+    });
+
+    function PublicNumCenterController($scope) {
+        var bindData = JSON.parse(appcan.locStorage.val("AddPublicNumCenterData"));
+        $scope.NData = bindData;
+        imageObj.src = bindData.Icon;
+        var receiveMsg = bindData.ReceiveMsg;
+        if (receiveMsg == "true") {
+            $(".switch").addClass("bc-head");
+        } else {
+            $(".switch").removeClass("bc-head");
+        }
+    }
+
+    appcan.button(".viewHistoryMsg", "btn-act2", function () {
+        //alert("调用在线页面");
+    });
+
+    appcan.button(".btn_PublicNum", "ani-act", function () {
+        //用于判断第一次关注的情况
+        appcan.locStorage.setVal("IS_FIRST", "true");
+        appcan.locStorage.setVal("DataSource", "AddPublicNumDetail");
+        appcan.window.open("PublicNumMsg", "PublicNumMsg.html", 2);
+        
+    });
+</script>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../css/ui-box.css">
+    <link rel="stylesheet" href="../../../css/ui-base.css">
+    <link rel="stylesheet" href="../../../css/ui-color.css">
+    <link rel="stylesheet" href="../../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../../css/appcan.control.css">
+    <link rel="stylesheet" href="../EditEmailContent/css/main.css">
+    <link rel="stylesheet" type="text/css" href="../EditEmailContent/inputStyle/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../EditEmailContent/inputStyle/fonts/font-awesome-4.2.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="../EditEmailContent/inputStyle/css/demo.css" />
+    <link rel="stylesheet" type="text/css" href="../EditEmailContent/inputStyle/css/component.css" />
+</head>
+<body class="um-vp bc-bg">
+<div class="container">
+    <section class="content">
+        <span class="ub input input--hoshi">
+            <input class="ub ub-f1 input__field input__field--hoshi" type="text" id="Addresser"/>
+            <span class="addAddresser ub uinn fa fa-plus input__field input__field--hoshi"></span>
+            <label class="input__label input__label--hoshi input__label--hoshi-color-1" for="Addresser">
+                <span class="input__label-content input__label-content--hoshi">收件人</span>
+            </label>
+        </span>
+        <div id="AddresserBox"></div>
+        <span class="ub input input--hoshi">
+            <input class="ub ub-f1 input__field input__field--hoshi" type="text" id="CC"/>
+            <span class="addCC ub uinn fa fa-plus input__field input__field--hoshi"></span>
+            <label class="input__label input__label--hoshi input__label--hoshi-color-3" for="CC">
+                <span class="input__label-content input__label-content--hoshi">抄&nbsp;&nbsp;&nbsp;&nbsp;送</span>
+            </label>
+        </span>
+        <div id="CCBox"></div>
+        <span class="input input--hoshi">
+            <input class="input__field input__field--hoshi" type="text" id="EmailTitle"/>
+            <label class="input__label input__label--hoshi input__label--hoshi-color-2" for="EmailTitle">
+                <span class="input__label-content input__label-content--hoshi">主&nbsp;&nbsp;&nbsp;&nbsp;题</span>
+            </label>
+        </span>
+        <span class="input input--hoshi">
+            <textarea rows="15" class="input__field input__field--hoshi" type="text" id="EmailContent"></textarea>
+            <!--<label class="input__label input__label&#45;&#45;hoshi input__label&#45;&#45;hoshi-color-3" for="EmailContent">-->
+                <!--<span class="input__label-content input__label-content&#45;&#45;hoshi">正&nbsp;&nbsp;&nbsp;&nbsp;文</span>-->
+            <!--</label>-->
+        </span>
+    </section>
+</div>
+<script src="../../../js/appcan.js"></script>
+<script src="../../../js/appcan.control.js"></script>
+<script src="../../../js/appcan.listview.js"></script>
+<script src="../../../js/Common.js"></script>
+<script src="../EditEmailContent/inputStyle/js/classie.js"></script>
+<script>
+    (function () {
+        // trim polyfill : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim
+        if (!String.prototype.trim) {
+            (function () {
+                // Make sure we trim BOM and NBSP
+                var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+                String.prototype.trim = function () {
+                    return this.replace(rtrim, '');
+                };
+            })();
+        }
+
+        [].slice.call(document.querySelectorAll('input.input__field')).forEach(function (inputEl) {
+            // in case the input is already filled..
+            if (inputEl.value.trim() !== '') {
+                classie.add(inputEl.parentNode, 'input--filled');
+            }
+
+            // events:
+            inputEl.addEventListener('focus', onInputFocus);
+            inputEl.addEventListener('blur', onInputBlur);
+        });
+
+        function onInputFocus(ev) {
+            classie.add(ev.target.parentNode, 'input--filled');
+        }
+
+        function onInputBlur(ev) {
+            if(ev.target.id != "EmailTitle"){
+                var addresser = $(this).val();
+                if(addresser!=""){
+                    var addresserBox = '<span class="contactSpan" onclick="DeleteAddresser(this)" Addresser="'+addresser+'">'+addresser.substr(0,6)+'</span>';
+                    $(this).parent().next().append(addresserBox);
+                }
+                $(this).val("");
+            }
+            if (ev.target.value.trim() === '') {
+                classie.remove(ev.target.parentNode, 'input--filled');
+            }
+        }
+    })();
+</script>
+</body>
+<script>
+    var AddresserOrCC;//判断是添加收件人还是抄送人
+    appcan.ready(function () {
+        appcan.initBounce();
+    });
+
+    $(function(){
+        $(".addAddresser").on("click",function(){
+            AddresserOrCC = "Addresser";
+            appcan.window.open("AddresserList","EditEmail/AddresserList.html",5);
+        });
+        $(".addCC").on("click",function(){
+            AddresserOrCC = "CC";
+            appcan.window.open("AddresserList","EditEmail/AddresserList.html",5);
+        });
+    });
+
+    function Sind(){
+        //var addresser = $("#Addresser").val();
+        //var cc = $("#CC").val();
+        var emailTitle = $("#EmailTitle").val();
+        var emailContent = $("#EmailContent").val();
+        var addresserBoxHtml = $("#AddresserBox").html();
+
+        if(addresserBoxHtml==""){
+            alert("收件人不能为空！");
+            return;
+        }else if(emailTitle==""){
+            alert("主题不能为空！");
+            return;
+        }else if(emailContent==""){
+            alert("正文不能为空！");
+            return;
+        }else{
+            var addresser = [];
+            var cc = [];
+            var addresserBox = $("#AddresserBox").children();
+            var CCBox = $("#CCBox").children();
+            $.each(addresserBox,function(i,addresserSpan){
+                addresser.push($(this).attr("Addresser"));
+            });
+            $.each(CCBox,function(j,ccSpan){
+                cc.push($(this).attr("Addresser"));
+            });
+            SindEmail(addresser,cc,emailTitle,emailContent)
+        }
+    }
+
+    function SindEmail(addresser,cc,emailTitle,emailContent){
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.locStorage.val("ApiConfig"));
+        var sindEmailUrl = apiConfig.SindEmail.Url;
+        var sindEmailType = apiConfig.SindEmail.Type;
+        var sindEmailParameters = {"Addresser":addresser,"CC":cc,"EmailTitle":emailTitle,"EmailContent":emailContent,"accessToken":token};
+        sindEmailUrl = GetMappingUrl(sindEmailUrl,sindEmailParameters);
+        $.ajax({
+            url: sindEmailUrl,
+            dataType: "json",
+            Type: sindEmailType,
+            data: sindEmailParameters,
+            success: function(msg){
+                isSuccess = 1;
+                appcan.window.openToast( '发送成功！', '1000' );
+                CloseWindow();
+            },
+            complete: function(){
+                if(isSuccess==0){
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '发送失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                Sind();
+                            }
+                            else if (data == 1) {
+                                CloseWindow();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+    function AddAddresserAndCC(){
+        var addresserArr = eval(appcan.locStorage.val("AddresserArr"));
+        var addresserBox = '';
+        var emailContacts = JSON.parse(appcan.locStorage.val("EmailContacts"));
+
+        $.each(addresserArr,function(i,addresserId){
+            $.each(emailContacts,function(j,singleEailContact){
+                if(singleEailContact.AddresserId == addresserId){
+                    addresserBox += '<span class="contactSpan" onclick="DeleteAddresser(this)" Addresser="'+singleEailContact.Addresser+'">'+singleEailContact.NickName+'</span>';
+                }
+            });
+        });
+
+        if(AddresserOrCC == "Addresser"){
+            $("#AddresserBox").append(addresserBox);
+        }else{
+            $("#CCBox").append(addresserBox);
+        }
+    }
+
+    function CloseWindow(){
+        appcan.window.evaluateScript( {
+            name: "EditEmail",
+            scriptContent: "CloseWindow()"
+        } );
+    }
+
+    function DeleteAddresser(obj){
+        obj.remove();
+    }
+</script>
+</html>

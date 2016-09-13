@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../../css/ui-box.css">
+        <link rel="stylesheet" href="../../css/ui-base.css">
+        <link rel="stylesheet" href="../../css/ui-color.css">
+        <link rel="stylesheet" href="XingeDemoContent/css/main.css">
+        <link rel="stylesheet" href="../../css/animate.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div class="ub ub-ver ub-fv">
+            <div class="ulev-sta uinn-sta tx-c">
+                信鸽推送Demo
+            </div>
+            <div class="uinn-sta1 ub ub-f1">
+                <div class="ub ub-ac ub-ver uinn-sta3">
+                    <div class="t-blu-sta ulev-4">
+                        推送给所有人
+                    </div>
+                    <div id="PushToAllDevice" class="DemoDiv uinn animated bounceIn">
+                        <div class="uwh-sta umar-t-sta uc-a-sta c-blu-sta ub ub-ver">
+                            <div class="ulev-sta2 bc-text-head uinn-sta2 tx-c">
+                                点击
+                            </div>
+                            <div class="uinn-at1 ulev-4 bc-text-head tx-c">
+                                试试
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ub ub-ae ub-ver ub-f1">
+                    <div class="ub ub-ac ub-ver">
+                        <div class="t-blu2-sta ulev-2">
+                            推送给我自己
+                        </div>
+                        <div id="PushToMyDevice" class="DemoDiv uinn animated bounceIn">
+                            <div class="uwh-sta2 umar-t-sta uc-a-sta2 c-blu-sta2 ub ub-ver">
+                                <div class="ulev-sta bc-text-head uinn-sta5 tx-c">
+                                    点击
+                                </div>
+                                <div class="uinn-sta4 ulev-2 bc-text-head tx-c">
+                                    试试
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ub ub-ac ub-ver uinn-sta6">
+                        <div class="t-org2 ulev-2">
+                            推送给个人
+                        </div>
+                        <div id="PushToSingleAccount" class="DemoDiv uinn animated bounceIn">
+                            <div class="uwh-sta4 umar-t-sta uc-a-sta3 c-org ub ub-ver">
+                                <div class="ulev-sta3 bc-text-head uinn-sta5 tx-c">
+                                    点击
+                                </div>
+                                <div class="uinn-sta7 ulev-2 bc-text-head tx-c">
+                                    试试
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/Common.js"></script>
+    <script>
+        appcan.ready(function() {
+            appcan.initBounce();
+            $(".DemoDiv").on("touchstart", function(){
+                $(this).removeClass("bounceIn");
+                $(this).removeClass("rubberBand");                
+            })
+            $(".DemoDiv").on("touchend", function(){
+                $(this).addClass("rubberBand");
+                var DemoID = $(this).attr("id");
+                switch(DemoID){
+                    case "PushToAllDevice":
+                        appcan.window.openToast("暂不开放，抱歉！", 1000);
+                        //PushToAllDevice();
+                        break;
+                    case "PushToSingleAccount":
+                        appcan.window.openToast("暂不开放，抱歉！", 1000);
+                        //appcan.window.open("XingeDemo", "DemoList/XingeDemo.html", 5);
+                        //PushToSingleAccount();
+                        break;
+                    case "PushToMyDevice" :
+                        PushToMyDevice();
+                        break;
+                }
+            })
+        });
+
+        function PushToSingleAccount() {
+            //var url = "http://localhost/zhihuidao.mobile.mcapisample/api/user/gettoken";
+            //var url = "http://192.168.199.100/zhihuidao.mobile.mcapisample/api/xingetest/PushSingleAccount";
+            //var data = {'Account':'abc','Message':{'Title':'测试','Content':'测试推送到指定账号'}};
+
+            var apiConfig = JSON.parse( appcan.getLocVal( "ApiConfig" ) );
+            var PushToSingleAccountUrl = apiConfig.PushToSingleAccount.Url;
+            var PushToSingleAccountParameters = { 'Account': 'abc', 'Message': { 'Title': '测试', 'Content': '测试推送到指定账号' } };
+            PushToSingleAccountUrl = GetMappingUrl( PushToSingleAccountUrl, PushToSingleAccountParameters );
+            var PushToSingleAccountType = apiConfig.PushToSingleAccount.Type;
+
+            $.ajax({
+                url: PushToSingleAccountUrl,
+                data: PushToSingleAccountParameters,
+                type: PushToSingleAccountType,
+                dataType: "json",
+                success: function(data){
+                    if(data.res_code==0){
+                        appcan.window.openToast("success", 1000);
+                    }else{
+                        alert(JSON.stringify(data));
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert("faile");
+                    alert(XMLHttpRequest+"  |  "+textStatus+"  |  "+errorThrown);
+                }
+
+            })
+        }
+
+        function PushToAllDevice(){
+            var url = "http://192.168.199.100/zhihuidao.mobile.mcapisample/api/xingetest/PushAllDevice";
+            var data = { "Title": "测试", "Content": "测试推送到所有设备" };
+
+            var apiConfig = JSON.parse( appcan.getLocVal( "ApiConfig" ) );
+            var PushToAllDeviceUrl = apiConfig.PushToAllDevice.Url;
+            var PushToPushToAllDeviceParameters = { "Title": "测试", "Content": "测试推送到所有设备" };
+            PushToPushToAllDeviceUrl = GetMappingUrl( PushToPushToAllDeviceUrl, PushToPushToAllDeviceParameters );
+            var PushToPushToAllDeviceType = apiConfig.PushToAllDevice.Type;
+
+            $.ajax({
+                url: PushToAllDeviceUrl,
+                data: PushToPushToAllDeviceParameters,
+                type: PushToPushToAllDeviceType,
+                dataType: "json",
+                success: function(data){
+                    if(data.res_code==0){
+                        appcan.window.openToast("success", 1000);
+                    }else{
+                        alert(JSON.stringify(data));
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert("faile");
+                    alert(XMLHttpRequest+"  |  "+textStatus+"  |  "+errorThrown);
+                }
+            })
+        }
+
+        function PushToMyDevice() {
+            //var url = "http://192.168.199.100/zhihuidao.mobile.mcapisample/api/xingetest/PushSingleAccount";
+            //var account = JSON.parse(appcan.locStorage.val("UserInfo")).Id;
+            //var data = { 'Account': account, 'Message': { 'Title': '测试', 'Content': '测试推送到我的设备' } };
+            //var account = JSON.parse(appcan.locStorage.val("UserInfo")).Id;
+            var account = appcan.locStorage.val("xgID");
+            var apiConfig = JSON.parse( appcan.locStorage.val( "ApiConfig" ) );
+            var PushToSingleAccountUrl = apiConfig.PushToSingleAccount.Url;
+            var PushToSingleAccountParameters = { 'Account': account, 'Message': { 'Title': '测试', 'Content': '测试推送到我的设备' } };
+            PushToSingleAccountUrl = GetMappingUrl( PushToSingleAccountUrl, PushToSingleAccountParameters );
+            var PushToSingleAccountType = apiConfig.PushToSingleAccount.Type;
+            $.ajax({
+                url: PushToSingleAccountUrl,
+                data: PushToSingleAccountParameters,
+                type: PushToSingleAccountType,
+                dataType: "json",
+                success: function(data){
+                    if(data.res_code==0){
+                        appcan.window.openToast("success", 1000);
+                    }else{
+                        alert(JSON.stringify(data));
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert("faile");
+                    alert(XMLHttpRequest+"  |  "+textStatus+"  |  "+errorThrown);
+                }
+
+            })
+        }
+
+    </script>
+</html>

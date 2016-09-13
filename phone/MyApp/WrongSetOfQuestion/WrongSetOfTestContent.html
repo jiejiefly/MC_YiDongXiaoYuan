@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html ng-app ng-controller = "WrongSetOfQuestionByTestController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../../css/ui-box.css">
+        <link rel="stylesheet" href="../../css/ui-base.css">
+        <link rel="stylesheet" href="../../css/ui-color.css">
+        <link rel="stylesheet" href="../../css/appcan.icon.css">
+        <link rel="stylesheet" href="../../css/appcan.control.css">
+        <link rel="stylesheet" href="WrongSetOfTestContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg">
+        <div id="divLoading" class="ub-f1">
+            <div class="loading">
+                <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+            </div>
+        </div>
+        <div id="divContent" style="display:none; padding:0.625em 0;">
+            <div class="ub ub-ver uinn-a1">
+                <div class="uba bc-border c-wh umar-at1" ng-repeat = "data in BindData" >   
+                    <ul class="ub t-bla ub-ac uinn-pFS1 Exam" ExamId = "{{data.ExamId}}">      
+                        <li class="ub-f1 ut-s" ng-bind = "data.ExamTitle"></li>       
+                        <li class="tx-r t-gra-pFS1">
+                            <span class="t-bla" ng-cloak>({{data.ErrorCount}})</span>
+                        </li> 
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../../js/appcan.js"></script>
+        <script src="../../js/appcan.control.js"></script>
+        <script src="../../js/angular.min.js"></script>
+        <script src="../../js/Common.js"></script>
+    </body>
+    <script>
+        var ExamId;
+        appcan.ready(function() {
+            $("#divLoading").hide();
+            $("#divContent").show();
+            
+            appcan.button(".Exam", "btn-act2", function(){
+                ExamId =  $(this).attr("ExamId");
+                GetWrongQuestionDetail();
+                appcan.window.open("QuestionDetail", "QuestionDetail.html", 2);
+             });
+        });
+        
+        function WrongSetOfQuestionByTestController($scope){
+            GetWrongQuestionNumByTest();
+            var data = appcan.locStorage.val("TESTLOCDATA");
+            data = JSON.parse(data);
+            $scope.BindData = data;
+        }
+        
+        function GetWrongQuestionNumByTest(){
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetErrorCountByExam.Url;
+            var Type = apiConfig.Notice.Type;
+            var parameters = {"Token" : token, "Subject" : subject};
+            var url = GetMappingUrl(Url, parameters);
+            var subject = appcan.locStorage.val("SUBJECT");
+            var isSuccess = 0;
+            $.ajax({
+                url:url,
+                type: Type,
+                async: false,
+                data: parameters,
+                dataType: "json",
+                success: function (data) {
+                    isSuccess = 1;
+                    if(data.res_code == undefined){
+                        appcan.locStorage.setVal("TESTLOCDATA", data);
+                    }
+                    else if(data.res_code == "0") { }
+                    else if (data.res_code == "-1") {
+                        //-1表示Token无效
+                        alert("请重新登录！");
+                        appcan.window.evaluateScript({
+                            name: "MainTab",
+                            scriptContent: "ExitSys()"
+                        });
+
+                    }else { alert(data.res_message);}
+                },
+                complete: function (xhr, type, error) {
+                    if(isSuccess == 0){
+                        appcan.ready(function() {
+                            appcan.window.openToast({
+                                msg:'加载最新数据失败',
+                                duration:2000,
+                                position:5,
+                                type:0
+                            });
+                        });
+                    }
+                }
+            });
+        }
+        
+        function GetWrongQuestionDetail(){
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetErrorQuestion.Url;
+            var Type = apiConfig.Notice.Type;
+            var parameters = {"Token" : token, "ExamId" : ExamId};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess2 = 0;
+            $.ajax({
+                url:url,
+                type: Type,
+                async: false,
+                data: parameters,
+                dataType: "json",
+                success: function (data) {
+                    isSuccess2 = 1;
+                    if(data.res_code == undefined){
+                        appcan.locStorage.setVal("WrongQuestionData",data);
+                    }
+                    else if(data.res_code == "0") { }
+                    else if (data.res_code == "-1") {
+                        //-1表示Token无效
+                        alert("请重新登录！");
+                        appcan.window.evaluateScript({
+                            name: "MainTab",
+                            scriptContent: "ExitSys()"
+                        });
+
+                    }else { alert(data.res_message);}
+                },
+                complete: function (xhr, type, error) {
+                    if(isSuccess2 == 0){
+                        appcan.ready(function() {
+                            appcan.window.openToast({
+                                msg:'加载最新数据失败',
+                                duration:2000,
+                                position:5,
+                                type:0
+                            });
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+</html>

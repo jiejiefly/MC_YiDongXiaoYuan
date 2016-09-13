@@ -1,0 +1,28 @@
+.tx-c {
+    text-align:center;
+    vertical-align:middle;
+}
+.sc-text-tab {
+    color:#848484;
+}
+.ulev-1 {
+    font-size: 0.8125em !important;
+    border-right:solid 1px #BABABA;
+}
+.ulev-1:last-child {
+    font-size: 0.8125em !important;
+    border-right:solid 0 #BABABA;
+}
+.c-bg1{
+    background-color: #007DB8;
+}
+.c-bg2{
+    background-color: #00A1EA;
+}
+.c-bg3{
+    background-color: white;
+}
+.border-diy{
+    border-style: solid;
+}
+.loading{text-align:center;padding-top: 4.75em;}

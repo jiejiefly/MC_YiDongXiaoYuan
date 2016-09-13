@@ -1,0 +1,53 @@
+.shop-wh{
+	min-width:3.17125em;
+	min-height:3.3125em;
+}
+.umwh{
+	min-width:0.6em;
+	min-height:1em;
+}
+.ulim12{
+	max-width: 14em;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.t-red{
+	color:red;
+}
+.uinn-t{
+	padding: .3em 0;
+}
+.ulev-8{
+	font-size:0.875em;
+}
+.ulev-9{
+	font-size:0.9375em;
+}
+
+.tab_badge1 {
+	padding-top:0.1em;
+	min-width: 1em;
+	height: 1em;
+	-webkit-border-radius: 1em;
+	border-radius: 1em;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.wordBreak{
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.avatar{
+	border-radius: 2em;
+	text-align: center;
+	line-height: 4em;
+}
+
+.avatarBorder{
+	border: 1px solid #e8e8e8;
+}
+

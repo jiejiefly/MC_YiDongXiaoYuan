@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html ng-app ng-controller="LocationTeacherController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>教师版定位查询</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="LocationInfoListContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div class="ub ub-ver">
+        <!--<div class="uinn-a6 t-gra3 ulev-app1">当前位置：<span>第二餐厅</span></div>-->
+        <div class="ub ub-ver uinn-a1">
+            <div class="ub-img-rank rank-bg uinn-t-rank">
+                <div class="ub c-blu-rank uinn-a1 t-blu-rank umar-fr1">
+                    <div class="uw-rank ulev-4">
+                        姓名
+                    </div>
+                    <div class="uw-rank2 ut-s ulev-4 ub-f1">
+                        位置记录
+                    </div>
+                    <div class="uw-rank ulev-4 ub-f1">
+                        最后位置进入时间
+                    </div>
+                    <div class="uw-rank ulev-4 ub-f1">
+                        最后位置离开时间
+                    </div>
+                </div>
+                <div class="singleLocationDetail ub c-wh uinn-a1 ubb bc-border" ng-repeat="locationDetail in LocationDetailArr" locationdetailid="{{locationDetail.ID}}">
+                    <div class="uw-rank t-blu ulev-4 ufm1" ng-bind="locationDetail.Name"></div>
+                    <div class="uw-rank2 ut-s t-gra5 ulev-app1 ub-f1" ng-bind="locationDetail.NowLocation"></div>
+                    <div class="uw-rank t-blu ulev-4 ufm1 ub-f1" ng-bind="locationDetail.ArriveTime|date: 'yyyy-mm-dd hh:mm'"></div>
+                    <div class="uw-rank t-blu ulev-4 ufm1 ub-f1" ng-bind="locationDetail.LeaveTime|date: 'yyyy-mm-dd hh:mm'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/Common.js"></script>
+    <script src="../../js/angular.min.js"></script>
+</body>
+<script>
+    appcan.ready(function () {
+        appcan.initBounce();
+        ClickEventDepartment();
+    });
+    function LocationTeacherController($scope) {
+        var locationDetail = JSON.parse(appcan.locStorage.getVal("LocationDetail"));
+        $scope.LocationDetailArr = locationDetail;
+
+    }//控制器结束
+    function ClickEventDepartment() {
+        $(".singleLocationDetail").on("click", function () {
+            appcan.window.open("SingleStudentLocationDetail", "LocationInfoList/SingleStudentLocationDetail.html", 5);
+            var locationdetailid = $(this).attr("LocationDetailId");
+            appcan.locStorage.val("LocationDetailId", locationdetailid);
+        });
+    }
+</script>
+
+</html>

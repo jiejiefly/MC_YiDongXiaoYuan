@@ -1,0 +1,16 @@
+.uinput2{
+    width: 100%;
+    height: 3em;
+    font-size: 80%;
+}
+.lis-icon-s1 {
+    width: 3em;
+    margin: 0em 0.625em 0em 0px;
+    min-height: 3em;
+    border-radius:2em;
+}
+.btn-act2{
+    		background-color: #E0E0E0;
+}
+
+.txtH-v { overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;}

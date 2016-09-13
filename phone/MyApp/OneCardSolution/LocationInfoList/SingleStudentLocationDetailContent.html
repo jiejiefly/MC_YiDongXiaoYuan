@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html ng-app ng-controller="InfoPositionController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>定位信息浮动窗口</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../css/ui-box.css">
+    <link rel="stylesheet" href="../../../css/ui-base.css">
+    <link rel="stylesheet" href="../../../css/ui-color.css">
+    <link rel="stylesheet" href="../../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../../css/appcan.control.css">
+    <link rel="stylesheet" href="SingleStudentLocationDetailContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+    <div class="uinn">
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b ulev-1" style="min-width:5em;">
+                姓名
+            </div>
+            <div id="Name" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.Name"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b  ulev-1" style="min-width:5em;">
+                学号
+            </div>
+            <div id="StudentID" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.StudentID"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b ulev-1" style="min-width:5em;">
+                部门
+            </div>
+            <div id="Department" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.Department"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b ulev-1" style="min-width:5em;">
+                身份类型
+            </div>
+            <div id="IDType" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.IDType"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b ulev-1" style="min-width:5em;">
+                当前位置
+            </div>
+            <div id="NowLocation" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.NowLocation"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth t-9b ulev-1" style="min-width:5em;">
+                最后位置
+            </div>
+            <div id="LastLocation" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.LastLocation"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth end t-9b ulev-1" style="min-width:5em;">
+                最后位置进入时间
+            </div>
+            <div id="ArriveTime" class="ub-f1 ub ulev-1" ng-bind="LocationDetail.ArriveTime"></div>
+        </div>
+        <div class="ub ubb b-c2 uinn8">
+            <div class="diyWidth end t-9b ulev-1" style="min-width:5em;">
+                最后位置离开时间
+            </div>
+            <div id="LeaveTime" class="ub-f1 ub  ulev-1" ng-bind="LocationDetail.LeaveTime"></div>
+        </div>
+    </div>
+    <script src="../../../js/appcan.js"></script>
+    <script src="../../../js/appcan.control.js"></script>
+    <script src="../../../js/angular.min.js"></script>
+</body>
+<script>
+    appcan.ready(function () {
+        appcan.initBounce();
+    })
+    function InfoPositionController($scope) {
+        var locationDetail = JSON.parse(appcan.locStorage.getVal("LocationDetail"));
+        var ID = appcan.locStorage.getVal("LocationDetailId");
+        for (var i = 0; i < locationDetail.length; i++) {
+            if (locationDetail[i].ID == ID) {
+                $scope.LocationDetail = locationDetail[i];
+            }
+        }
+    }//控制器结束
+</script>
+</html>

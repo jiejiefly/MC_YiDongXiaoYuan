@@ -1,0 +1,129 @@
+﻿/*@import url(ui-common.css);*/
+
+.c-wh{background-color: white;}
+.loading{text-align:center;padding-top: 4.75em;}
+.noData {text-align:center;padding-top: 1.5em; font-size:1em; display:none;}
+
+/*���� ui-base .ut-s*/ 
+.ut-v { overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;-webkit-box-orient: vertical;}
+.ut-v1{
+    position:relative;
+    line-height:1.4em;
+    /* 3 times the line-height to show 3 lines */
+    height:4.2em;
+    overflow:hidden;
+}
+.ut-v1::after {
+    content:"...";
+    font-weight:bold;
+    position:absolute;
+    bottom:0;
+    right:0;
+    padding:0 20px 1px 45px;
+    background:url(http://css88.b0.upaiyun.com/css88/2014/09/ellipsis_bg.png) repeat-y;
+}
+
+/*NoData需引用css*/
+/*NoData需引用css*/
+.NoDataImg_box {
+    padding-top:0.1em;
+    width:100%;
+}
+.NoDataImg_bg{
+    background: no-repeat;  
+    background-position:50% 50%;
+    height:10em;
+    background-size:contain;
+    background-image:url("icons/NoData2.png");
+}
+.NoData_box{
+    text-align:center;
+    line-height:2em;
+    padding:1em 0;
+    margin:0px 1em;
+    border-top:0.075em dashed #999999;
+    margin-top:1em;
+}
+.NoData_color {
+    color:#8f8f8f;
+}
+.btn-act2{
+    background-color: #E0E0E0;
+}
+.btn-act3{
+    opacity: 0.3;
+}
+.wordBreak{
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/*ng-cloak 隐藏AngularJS绑定代码的一种方案*/
+@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\:form{display:block;}.ng-animate-start{clip:rect(0,auto,auto,0);-ms-zoom:1.0001;}.ng-animate-active{clip:rect(-1px,auto,auto,0);-ms-zoom:1;}
+
+.spinner {
+    margin: 10em auto;
+    width: 10em;
+    height: 5em;
+    text-align: center;
+    font-size: .5em;
+}
+
+.spinner > div {
+    background-color: #00A1EA;
+    height: 100%;
+    width: .5em;
+    display: inline-block;
+
+    -webkit-animation: sk-stretchdelay 1.3s infinite ease-in-out;
+    animation: sk-stretchdelay 1.3s infinite ease-in-out;
+}
+.spinner .rect2 {
+    -webkit-animation-delay: -1.2s;
+    animation-delay: -1.2s;
+}
+
+.spinner .rect2 {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+    -webkit-animation-delay: -1.0s;
+    animation-delay: -1.0s;
+}
+
+.spinner .rect4 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+    -webkit-animation-delay: -0.8s;
+    animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+    0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+    20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes sk-stretchdelay {
+    0%, 40%, 100% {
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+    }  20% {
+           transform: scaleY(1.0);
+           -webkit-transform: scaleY(1.0);
+       }
+}
+
+/*撑开浮动盒子父元素的高度*/
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+

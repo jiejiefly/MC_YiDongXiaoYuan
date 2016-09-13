@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="EditMsgContent/css/main.css">
+    <link rel="stylesheet" type="text/css" href="EditMsgContent/inputStyle/css/normalize.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="EditMsgContent/inputStyle/fonts/font-awesome-4.2.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="EditMsgContent/inputStyle/css/demo.css"/>
+    <link rel="stylesheet" type="text/css" href="EditMsgContent/inputStyle/css/component.css"/>
+</head>
+<body class="um-vp bc-bg">
+<div class="container">
+
+    <div id="listview" class="ubt bc-border sc-bg">
+        <ul>
+            <li class="addAddresser ubb ub bc-border bc-text ub-ac lis" data-index="0">
+                <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1">接收人</div>
+                <div class="fa fa-angle-right ulev2 sc-text"></div>
+            </li>
+            <li>
+                <div id="AddresserBox"></div>
+                <div style="clear: both"></div>
+            </li>
+            <li class="ubb ub bc-border bc-text ub-ac lis" data-index="1">
+                <span>标题：</span>
+                <div class="sc-bg-active uinput ub ub-f1  bc-border uba">
+                    <input id="notificationTitle" placeholder="" type="text" class="ub-f1">
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="uba bc-border uinput ub ub-f1">
+    <textarea id="notificationContent" rows="20" placeholder="正文" type="text" class="ub-f1"></textarea>
+</div>
+
+</div>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>
+<script src="../../js/appcan.listview.js"></script>
+<script src="../../js/Common.js"></script>
+</body>
+<script>
+    var AddresserOrCC;//判断是添加收件人还是抄送人
+    appcan.ready(function () {
+        appcan.initBounce();
+    });
+
+    $(function () {
+        $(".addAddresser").on("click", function () {
+            AddresserOrCC = "Addresser";
+            appcan.window.open("AddresserList", "EditMsg/AddresserList.html", 5);
+        });
+        $(".addCC").on("click", function () {
+            AddresserOrCC = "CC";
+            appcan.window.open("AddresserList", "EditMsg/AddresserList.html", 5);
+        });
+    });
+
+    function Sind() {
+        //var addresser = $("#Addresser").val();
+        //var cc = $("#CC").val();
+        var notificationTitle = $("#notificationTitle").val();
+        var notificationContent = $("#notificationContent").val();
+        var addresserBoxHtml = $("#AddresserBox").html();
+
+        if (addresserBoxHtml == "") {
+            alert("收件人不能为空！");
+        } else if (notificationTitle == "") {
+            alert("主题不能为空！");
+        } else if (notificationContent == "") {
+            alert("正文不能为空！");
+        } else {
+            var addresser = '';
+            var addresserBox = $("#AddresserBox").children();
+            $.each(addresserBox, function (i, addresserSpan) {
+                if(addresserBox.length == (i+1)){
+                    addresser += $(this).attr("Addresser");
+                }else{
+                    addresser += $(this).attr("Addresser") + ";";
+                }
+            });
+            sendNotification(addresser, notificationTitle, notificationContent)
+        }
+    }
+
+    function sendNotification(addresser, notificationTitle, notificationContent) {
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.locStorage.val("ApiConfig"));
+        var sendNotificationUrl = apiConfig.SendNotification.Url;
+        var sendNotificationType = apiConfig.SendNotification.Type;
+        var sendNotificationParameters = {
+            "recivers": addresser,
+            "title": notificationTitle,
+            "text": notificationContent,
+            "token": token
+        };
+        $.ajax({
+            url: sendNotificationUrl,
+            dataType: "json",
+            type: sendNotificationType,
+            data: sendNotificationParameters,
+            success: function (msg) {
+                isSuccess = 1;
+                appcan.window.openToast('发送成功！', '1000');
+                setTimeout("CloseWindow();",1000);
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '发送失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                Sind();
+                            }
+                            else if (data == 1) {
+                                CloseWindow();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+    function AddAddresserAndCC() {
+
+        var addresserArr = eval(appcan.locStorage.val("AddresserArr"));
+        var addresserBox = '';
+        var notificationContacts = JSON.parse(localStorage.contactsData)[0].ContactLists;
+
+        $.each(addresserArr, function (i, addresserId) {
+            $.each(notificationContacts, function (j, singleEailContact) {
+                if (singleEailContact.ID == addresserId) {
+                    addresserBox += '<span class="contactSpan" onclick="DeleteAddresser(this)" Addresser="' + singleEailContact.ID + '">' + singleEailContact.DisplayName + '</span>';
+                }
+            });
+        });
+        $("#AddresserBox").append(addresserBox);
+    }
+
+    function CloseWindow() {
+        appcan.window.evaluateScript({
+            name: "EditMsg",
+            scriptContent: "CloseWindow()"
+        });
+    }
+
+    function DeleteAddresser(obj) {
+        obj.remove();
+    }
+
+    
+
+    
+
+</script>
+</html>

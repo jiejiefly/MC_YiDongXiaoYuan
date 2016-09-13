@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html ng-app="SchoolNewsApp" ng-controller="SchoolNewsController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="SchoolNewsContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg">
+        <div id="divLoading" class="ub-f1">
+            <div class="loading">
+                <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+            </div>
+        </div>
+        <div id="divContent" style="display:none; padding:0.625em 0;">
+        <div class="umar-b" ng-repeat="data in NData">
+            <!-- 单条新闻开始 -->
+            <div ng-if = "data.IsMore == 'N'">
+                <div class="tx-c sc-text ulev-1">{{data.MessageDate|date : 'yyyy-MM-dd HH:mm'}}</div>
+                <div class="singleSchoolNew uba bc-border c-wh umar-v uc-a1 uinn2" messageId = "{{data.MessageID}}" newsId = "{{data.MessageContent[0].NewsId}}">
+                    <ul>
+                        <li class="umar-t">
+                            <div class="ulev0 txt-v">{{data.MessageContent[0].Title}}</div>
+                        </li>
+                        <li class="sc-text ulev-1 umar-b umar-t">{{data.MessageContent[0].Date|date : 'yyyy-MM-dd'}}</li>
+                        <li class = "umar-t1" >
+                            <div class="ub-img" style="text-align: center;">
+                                <img src={{data.MessageContent[0].Picture}} class="newspic">
+                            </div>
+                        </li>
+                        <li class="umar-t1">
+                            <div class="ut-m txtH-v fontSize sc-text">{{data.MessageContent[0].Content|to_trusted}}</div>
+                        </li>
+                        <!--<li class="ubt bc-border umar-b umar-t"></li>-->
+                        <li class="ub ub-ac fontSize">
+                            <div class="ub-f1 marg-l ub ub-ver ut-m txt-v umar-t2 umar-b">查看详情</div>
+                            <!--<div class="fa fa-angle-right ulev2 sc-text"></div>-->
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 单条新闻结束 -->
+            
+            <!-- 多条新闻开始 -->
+            <div ng-if = "data.IsMore == 'Y'">
+                <div class="tx-c sc-text ulev-1">{{data.MessageDate|date : 'yyyy-MM-dd HH:mm'}}</div>
+                <div class="school_news uba bc-border c-wh umar-v uc-a1">
+                    <div ng-repeat = "datacontent in data.MessageContent">
+                        <div>
+                            <ul class = "moreSchoolNews uinn-diy1" messageId = "{{data.MessageID}}" newsId = "{{datacontent.NewsId}}" ng-if = "datacontent.NewsId == data.MessageContent[0].NewsId">
+                                <li>
+                                    <div class="ub-img" style="text-align: center; position: relative;">
+                                        <img src={{data.MessageContent[0].Picture}} class="newspic">
+                                        <div class="textOnPic tx-l ut-s" style="position: absolute; z-index: 2;left: 1px; bottom: 0.28em;">
+                                            <span class="bc-text-head">{{datacontent.Title}}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class = "moreSchoolNews uinn-diy1 ubt bc-border ub ub-pj uinn-lr" messageId = "{{data.MessageID}}" newsId = "{{datacontent.NewsId}}" ng-if = "datacontent.NewsId != data.MessageContent[0].NewsId">
+                                <li class = "umar-max14 divCenter uof-y txtH-v">{{datacontent.Title}}</li>
+                                <li>
+                                    <img src={{datacontent.Picture}} style = "width: 3.5em; height: 3.5em; vertical-align: middle;">
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 多条新闻结束 -->
+        </div>
+    </div>
+    </body>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/Common.js"></script>
+    <script>
+        appcan.ready(function() {
+            $("#divLoading").hide();
+            $("#divContent").show();
+
+            appcan.button(".singleSchoolNew", "btn-act2", function () {
+                var newsId = $(this).attr("newsId");
+                var messageId = $(this).attr("messageId");
+                SearchClickNews(messageId, newsId);
+                appcan.window.open("SchoolNewsDetail", "SchoolNews/SchoolNewsDetail.html", 2);
+            });
+            appcan.button(".moreSchoolNews", "btn-act2", function () {
+                var newsId = $(this).attr("newsId");
+                var messageId = $(this).attr("messageId");
+                SearchClickNews(messageId, newsId);
+                appcan.window.open("SchoolNewsDetail", "SchoolNews/SchoolNewsDetail.html", 2);
+            });
+        });
+        
+        //function SchoolNewsController($scope) {
+        //    GetSchoolNewsList($scope)
+        //    //$scope.NData = NewsData;
+        //}
+
+        var schoolNewsApp = angular.module("SchoolNewsApp", []);
+
+        schoolNewsApp.controller("SchoolNewsController", function ($scope) {
+            GetSchoolNewsList($scope);
+        });
+
+        schoolNewsApp.filter('to_trusted', ['$sce', function ($sce) {
+            return function (text) {
+                return $sce.trustAsHtml(text);
+            };
+        }]);
+
+        function GetSchoolNewsList($scope) {
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.GetSchoolNews.Url;
+            var Type = apiConfig.GetSchoolNews.Type;
+            var parameters = { 'Token': token};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                async: false,
+                data: parameters,
+                dataType: "json",
+                success: function (data) {
+                    isSuccess = 1;
+                    if (data.res_code == undefined) {
+                        if (data == "") {
+                            $scope.NoData = 1;
+                        } else {
+                            appcan.locStorage.setVal("DATA", data);
+                            $scope.NData = data;
+                        }
+                    }
+                    else if (data.res_code == "0") { }
+                    else if (data.res_code == "-1") {
+                        //-1表示Token无效
+                        alert("请重新登录！");
+                    }
+                    else {
+                        appcan.window.openToast({
+                            msg: data.res_message,
+                            duration: 2000,
+                            position: 5,
+                            type: 0
+                        });
+                    }
+                    
+                },
+
+                complete: function (xhr, type, error) {
+                    if (isSuccess == 0) {
+                        appcan.ready(function () {
+                            appcan.window.openToast({
+                                msg: '加载最新数据失败',
+                                duration: 2000,
+                                position: 5,
+                                type: 0
+                            });
+                        });
+                    }
+                }
+            });
+        }
+
+        function SearchClickNews(MessageId, NewsId) {
+            var MessageData = JSON.parse(appcan.locStorage.val("DATA"));
+            for (var i in MessageData) {
+                if (MessageData[i].MessageID == MessageId) {
+                    var NewsData = MessageData[i].MessageContent;
+                    for(var j in NewsData){
+                        if(NewsData[j].NewsId == NewsId){
+                            appcan.locStorage.setVal("NEWS_DETAIL", NewsData[j]);
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</html>

@@ -1,0 +1,22 @@
+.padding-c{
+    padding: 0.625em 0 0.625em 0;
+}
+.padding-i{
+    padding: 0.3em;
+}
+.img-margin-l{
+    margin-left: 2.6%;
+}
+figure{
+    width:23%;
+}
+figure img {
+    width: 100%;
+    height: 90%;
+}
+figure figcaption div{
+    font-size: 0.825em;
+}
+.click-figure{
+    opacity:0.5;
+}

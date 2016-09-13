@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html ng-app="ContactDetailAngular" ng-controller="singleContactController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>组织结构联系人详情浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="SingleContactContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+    <div class="ub ub-ver">
+        <div class="ub-img1 perBg uh-per1 ub-fh ub ub-ver">
+            <div class="uinn-a1 ub ub-f1">
+                <div class="uwh-per2 uc-a-per1 bc-bg ub ub-ac ub-pc uinn-a16">
+                    <div class="ub-fh ub-fv  ub-img uc-a-per2" style="background-image:url(SingleContactContent/css/myImg/NoContactIcon.png);" ng-if="SingleContactInformation.ContactIcon==null||SingleContactInformation.ContactIcon==''"></div>
+                    <div class="ub-fh ub-fv  ub-img uc-a-per2" style="background-image:url('{{SingleContactInformation.ProtraitUri}}');" ng-if="SingleContactInformation.ContactIcon!=null&&SingleContactInformation.ContactIcon!=''"></div>
+                </div>
+                <div class="ub-f1 umar-at1 umar-l-per1 ub ub-ver">
+                    <div class="ub ">
+                        <div class="umar-ar3 bc-text-head" id="contactName" ng-bind="SingleContactInformation.ContactName"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ub-f1 ub ub-ver">
+            <div id="listview1" class="ubt bc-border ubb c-wh umar-at1 uinn-a7">
+                <ul class="uinn-a7">
+                    <li class="ubb ub bc-border bc-text ub-ac lis">
+                        <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">
+                            <span>电话:</span>
+                            <span id="phoneNum" ng-bind="SingleContactInformation.Mobile" ng-if="SingleContactInformation.Mobile!=null&&SingleContactInformation.Mobile!=''"></span>
+                            <span ng-if="SingleContactInformation.Mobile==null||SingleContactInformation.Mobile==''">-</span>
+                        </div>
+                    </li>
+                    <li class="ub bc-border bc-text ub-ac lis">
+                        <div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 groupName">
+                            <span>班级:</span>
+                            <span id="class" ng-bind="SingleContactInformation.ClassName" ng-if="SingleContactInformation.ClassName!=''&&SingleContactInformation.ClassName!=null"></span>
+                            <span ng-if="SingleContactInformation.ClassName==''||SingleContactInformation.ClassName==null">-</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class = "uinn umar-t">
+            <div class="uinn">
+                <div class="btn ub ub-ac ub-pc c-wh uc-a1" id="btnCall">
+                    电话
+                </div>
+            </div>
+            <div class="uinn">
+                <div class="btn ub ub-ac ub-pc c-wh uc-a1" id="btnMsg">
+                    短信
+                </div>
+            </div>
+            <div class=" uinn">
+                <div class="btn ub ub-ac bc-text-head ub-pc bc-btn uc-a1 " id="btnAddFriend" contactId = "{{SingleContactInformation.ContactId}}">
+                    加为好友
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/appcan.listview.js"></script>
+    <script src="../js/Common.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/angular.min.js"></script>
+    </body>
+    <script>
+        appcan.ready(function() {
+            ClickEvent ();
+        });
+
+        var contactModule = angular.module('ContactDetailAngular', []);
+        contactModule.controller ('singleContactController', ['$scope', function ($scope) {
+            var schoolOrganizationContact = JSON.parse(appcan.locStorage.val("SchoolOrganizationContact"));
+            var contactId = schoolOrganizationContact.ID;
+            $.when(SearchContactData (contactId)).done(function (data) {
+                $scope.SingleContactInformation = data;
+                $scope.$apply();
+                //ClickEvent ();
+                appcan.locStorage.setVal("ContactInformation", data);
+            });
+        }]);
+
+        function SearchContactData (userId) {
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            if(userId == "c001"){
+                //LiYun
+                var Url = apiConfig.GetContact_LiYun.Url;
+                var Type = apiConfig.GetContact_LiYun.Type;
+            }else if(userId == "c002"){
+                //ZhangWu
+                var Url = apiConfig.GetContact_ZhangWu.Url;
+                var Type = apiConfig.GetContact_ZhangWu.Type;
+            }else if(userId == "c003"){
+                //ZhangLi
+                var Url = apiConfig.GetContact_ZhangLi.Url;
+                var Type = apiConfig.GetContact_ZhangLi.Type;
+            }
+            var parameters = {"userId": userId};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            var defer = $.Deferred();
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    defer.resolve(data);
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("Error!", 2000);
+                    }
+                }
+            });
+            return defer.promise();
+        }
+
+        function ClickEvent () {
+            var contactInformation = JSON.parse(appcan.locStorage.val("ContactInformation"));
+            var Mobile = contactInformation.Mobile;
+            var userName = contactInformation.ContactId;
+            appcan.button(".btn", "ani-act", function(){
+                var btn_id = $(this).attr("id");
+                switch (btn_id) {
+                    case 'btnCall':
+                        if (Mobile == null || Mobile == '') {
+                            appcan.window.openToast("电话号码为空！", 2000);
+                        } else {
+                            uexCall.dial(Mobile);
+                        }
+                        break;
+                    case "btnMsg":
+                        if (Mobile == null || Mobile == '') {
+                            appcan.window.openToast("电话号码为空！", 2000);
+                        } else {
+                            var content = "";
+                            uexSMS.open(Mobile, content);
+                        }
+                        break;
+                    case "btnAddFriend":
+                            //判断用户是否注册，如果没有注册，则进行注册，然后添加好友
+//                            var contactId = $(this).attr("contactId");
+//                            CheckUserRegisterEasemob (userName);
+//                            var CheckResult = appcan.locStorage.val("CheckUserRegisterEasemob");
+//                            appcan.locStorage.remove("CheckUserRegisterEasemob");
+//                            if(CheckResult.length > 0){
+//                                var userID = userName,
+//                                    gender = contactInformation.Gender,
+//                                    nameSpell = contactInformation.NameSpell,
+//                                    portraitUri = contactInformation.ContactIcon,
+//                                    name = contactInformation.ContactName,
+//                                    displayName = contactInformation.DisplayName,
+//                                    mobile = Mobile,
+//                                    email = contactInformation.Email,
+//                                    remark = contactInformation.Remark;
+//                                RegisterEasemob(userID, gender, nameSpell, portraitUri, name, displayName, mobile, email, remark)
+//                            }
+//                            uexEasemob.addContact('{"toAddUsername":"'+ userName +'","reason":""}');
+                            appcan.window.openToast(" 好友请求已发送. ", 3000);
+                        break;
+                }
+            });
+        }
+
+        //判断用户是否注册环信
+        function CheckUserRegisterEasemob (userName) {
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.IsUserRegisterEasemob.Url;
+            var Type = apiConfig.IsUserRegisterEasemob.Type;
+            var parameters = {"userNames": userName};
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                async:false,
+                dataType: "json",
+                data:userName,
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    appcan.locStorage.setVal("CheckUserRegisterEasemob", data);
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("Error!", 2000);
+                    }
+                }
+            });
+        }
+
+        //注册环信
+        function RegisterEasemob(userID, gender, nameSpell, portraitUri, name, displayName, mobile, email, remark){
+            var Url = apiConfig.RegistEasemobUser.Url;
+            var Type = apiConfig.RegistEasemobUser.Type;
+            var parameters = '{"UserName": "'+ userID +'","Gender": "'+ gender +'","NameSpell": "'+ nameSpell +'","PortraitUri": "'+ portraitUri +'", "Name": "'+ name +'","DisplayName": "'+ displayName +'","Mobile": "'+ mobile +'","Email": "'+ email +'","Remark": "'+ remark +'"}';
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+
+            $.ajax({
+                url: url,
+                type: Type,
+                data: parameters,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    var username = userID,
+                            password =  hex_md5(userID);
+                    uexEasemob.login('{"username":"' + username + '","password":"' + password + '"}');
+                },
+
+                complete: function (xhr, type, error) {
+                    if (isSuccess == 0) {
+
+                    }
+                }
+            });
+        }
+
+    </script>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/animate.css">
+    <link rel="stylesheet" href="LoadingPageDemoListContent/css/main.css">
+</head>
+<body class="um-vp bc-bg ub-ver" ontouchstart>
+    <div id="Demo1" class="demoDiv ub ub-f1 c-bad bc-text-head ub-ac uinn-m umar-b animated flipInX" style="z-index:5;">
+        <div class="ub-img res-order umwh-m"></div>
+        <div class="ub-f1 uinn-mtxt ut-s">
+            Demo1
+        </div>
+        <div class="ub-img res-arrow umw1 umh1"></div>
+    </div>
+    <div id="Demo2" class="demoDiv ub ub-f1 c-faa bc-text-head ub-ac uinn-m umar-b animated flipInX" style="z-index:4;">
+        <div class="ub-img res-wallet umwh-m"></div>
+        <div class="ub-f1 uinn-mtxt ut-s">
+            Demo2
+        </div>
+        <div class="ub-img res-arrow umw1 umh1"></div>
+    </div>
+    <div id="Demo3" class="demoDiv ub ub-f1 c-ffe bc-text-head ub-ac uinn-m umar-b animated flipInX" style="z-index:3;">
+        <div class="ub-img res-message umwh-m"></div>
+        <div class="ub-f1 uinn-mtxt ut-s">
+            Demo3
+        </div>
+        <div class="ub-img res-arrow umw1 umh1"></div>
+    </div>
+    <div id="Demo4" class="demoDiv ub ub-f1 c-00a bc-text-head ub-ac uinn-m umar-b animated flipInX" style="z-index:2;">
+        <div class="ub-img res-favorite umwh-m"></div>
+        <div class="ub-f1 uinn-mtxt ut-s">
+            Demo4
+        </div>
+        <div class="ub-img res-arrow umw1 umh1"></div>
+    </div>
+    <div id="Demo5" class="demoDiv ub ub-f1 c-4e6 bc-text-head ub-ac uinn-m umar-b animated flipInX" style="z-index:1;">
+        <div class="ub-img res-pwdprotection umwh-m"></div>
+        <div class="ub-f1 uinn-mtxt ut-s">
+            Demo5
+        </div>
+        <div class="ub-img res-arrow umw1 umh1"></div>
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+</body>
+<script>
+    appcan.ready( function () {
+        $( ".demoDiv" ).on( "touchstart", function () {
+            $( this ).removeClass( "flipInX" );
+            $( this ).removeClass( "hinge" );
+        } )
+        $( ".demoDiv" ).on( "touchend", function () {
+            $( this ).addClass( "hinge" );
+            var DemoID = $( this ).attr( "id" );
+            appcan.locStorage.val( "LoadingPageDemoId", DemoID );
+            appcan.window.open( "LoadingPage", "LoadingPageDemoList/LoadingPage.html", 5 );
+        } )
+    } )
+
+</script>
+</html>

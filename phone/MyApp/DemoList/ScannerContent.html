@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../../css/ui-base.css">
+        <link rel="stylesheet" href="../../css/ui-box.css">
+        <link rel="stylesheet" href="../../css/ui-color.css">
+        <link rel="stylesheet" href="../../css/appcan.control.css">
+        <link rel="stylesheet" href="../../css/project/new.css">
+        <script type="text/javascript"></script>
+    </head>
+    <body class="um-vp c-wh-pLG" ontouchstart>
+        <div class="conbor">
+            <div class="consj">
+                <div class="ulev2 uin9">
+                    二维码/条形码
+                </div>
+                <div class="uin8">
+                    打开二维码/条形码扫描
+                </div>
+                <div class="uin">
+                    <div class="ub btn bc-text-head btn1-cor ub-ac ub-pc" id="btn1">
+                        扫一扫
+                    </div>
+                </div>
+                <div class="umh1"></div>
+                <div class="uin10">
+                    扫描信息为:
+                </div>
+                <div class="ubb ubt bc-border bc-bg tcxx breakword" id="scanner"></div>
+                <!--div style="height: .5em;"></div>
+                <div  class="ub btn uinn5 btn4-n1 bc-text-head umar-a tx-c uinn   ub-ac ub-pc" style="font-size: .95em;" ontouchstart="appcan.touch('btn41-hover')" onclick="uexCall.dial(document.getElementById('uexCall.dial').value)">进入打电话界面</div>
+                </div-->
+                <div class="umh1"></div>
+            </div>
+        </div>
+        <script src="../../js/appcan.js"></script>
+        <script src="../../js/appcan.control.js"></script>
+    </body>
+    <script>
+        var cText = 0;
+        var cJson = 1;
+        var cInt = 2;
+
+        appcan.ready(function() {
+            appcan.initBounce();
+            uexScanner.cbOpen = ScannerSuccessCallBack;
+            uexWidgetOne.cbError = ScannerFailedCallBack;
+        })
+        function ScannerSuccessCallBack(opCode, dataType, data) {
+            var obj = eval('(' + data + ')');
+            switch(dataType) {
+            case cText:
+                alert("uex.cText");
+                break;
+            case cJson:
+                $('#scanner')[0].innerHTML = "Result:" + obj.code + "<br>Format:" + obj.type;
+                break;
+            case cInt:
+                alert("uex.cInt");
+                break;
+            default:
+                alert("error");
+            }
+
+        }
+
+        function ScannerFailedCallBack(data) {
+            alert(data);
+        }
+
+
+        appcan.button(".btn", "ani-act", function() {
+            switch(this.id) {
+            case "btn1":
+                uexScanner.open("ZBar");
+                break;
+            }
+        })
+    </script>
+</html>

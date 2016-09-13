@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<widget appId="11400866" channelCode="0000" height="480" pid="" sreensize="4.5" version="00.00.0001" viewmode="application" widgetId="" width="320">
+
+  <name>MC_移动校园</name>
+  <description/>
+  <author email="dev@eco-edu.cn">上海教享科技有限公司</author>
+  <icon src="icon.png"/>
+  <license href="http://www.eco-edu.cn"/>
+  <content encoding="utf-8" src="Index.html"/>
+  <updateurl/>
+  <logserverip>192.168.1.100</logserverip>
+  <showmyspace>false</showmyspace>
+  <obfuscation>true</obfuscation>
+  <bgcolor>#fefefe</bgcolor>
+  <orientation>1</orientation>
+  <debug>true</debug>
+  <partobfuscation/>
+  <webapp>false</webapp>
+</widget>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="PictureViewContent/css/main.css">
+
+    <style type="text/css">
+        #pic img {border: 1px solid #ccc; padding: 1px; margin: 3px;}
+    </style>
+</head>
+<body class="um-vp bc-bg">
+    <!-- 没有数据时显示的内容 开始-->
+    <div class="bc-bg nodata" style="display:none;">
+        <div class="NoDataImg_box">
+            <div class="NoDataImg_bg"></div>
+        </div>
+        <div class="NoData_box NoData_color">抱歉，暂时没有您要查看的数据！</div>
+    </div>
+    <!-- 没有数据时显示的内容结束 -->
+    
+    <!-- 图片列表开始 -->
+    <div class="ub ub-ver uinn-p1" id="pictureList"></div>
+    <!-- 图片列表结束 -->
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+</body>
+<script>
+    //定时器
+    var timeOutEvent = 0;
+    //真正长按后应该执行的内容
+    function LongPress(mark) {
+        timeOutEvent = 0;
+        //执行长按要执行的内容，如弹出菜单
+        appcan.window.alert({
+            title: "提示",
+            content: "您确定要删除此图片吗?",
+            buttons: ['确定', '取消'],
+            callback: function (err, data, dataType, optId) {
+                if (data == 0) {
+                    DeletePicture(mark);
+                }
+            }
+        });
+    }
+
+    appcan.ready(function () {
+        appcan.window.openToast("正在加载..."); 
+        
+        //判断从相册里面添加的图片是否已经被从相册里面删除，如果删除掉，那么需要从ArrData里面也删除掉。
+        //IsExists(); 
+        
+        pictureList();
+
+        //开始按
+        $(".ImgCls").on("touchstart", function () {
+            //这里设置定时器，定义长按700毫秒触发长按事件
+            timeOutEvent = setTimeout("LongPress('" + $(this).attr("Mark") + "')", 700);
+            return false;
+        });
+
+        //手释放，如果在700毫秒内就释放，则取消长按事件，此时可以执行onclick应该执行的事件
+        $(".ImgCls").on("touchend", function () {
+            clearTimeout(timeOutEvent);//清除定时器
+            if (timeOutEvent != 0) {
+                //var ImgPath = $(this).attr("Url");
+                var ImgMark = $(this).attr("Mark");
+                //var index = GetIndexOfJSON(ImgPath);
+                var index = GetIndexOfJSONByMark(ImgMark);
+                openImageGallery(index);
+            }
+            return false;
+        });
+
+        //如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+        $(".ImgCls").on("touchmove", function () {
+            clearTimeout(timeOutEvent);//清除定时器
+            timeOutEvent = 0;
+        });
+        
+        var isNoData = JSON.parse(appcan.locStorage.val("ArrData"));
+        if((isNoData == undefined) || (isNoData == "")){
+            $(".nodata").show();
+        }
+        appcan.window.closeToast();
+    })
+
+    function pictureList() {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        var tmpl = '${cb:begin}' + '<div class="uw-p25 ub ub-ac ub-pc">' + '<div class="mar-ar1 ub-img1 uwh-pics ImgCls" style="background-image:url(${picture});" Url = "${picture}" Mark = "${mark}"></div>' + '</div>${cb:end}'
+        var s = appcan.tempRenderList(tmpl, arrData, appcan.getObjLength(arrData), tmpleCb);
+        $('#pictureList').html(s);
+    }
+
+    var i = 0;
+    function tmpleCb(a, b) {
+        switch (b[1]) {
+            case 'begin':
+                i++;
+                if (i % 4 == 1) {
+                    return '<div class="ub umar-bp1">'
+                }
+                return '';
+            case 'end':
+
+                if (i % 4 == 0) {
+                    return '</div>'
+                }
+                return '';
+        }
+
+    }
+
+    function openImageGallery(index) {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        var array = new Array();
+
+        for (var i = 0; i < arrData.length; i++) {
+            array[i] = arrData[i].picture
+        }
+        uexImageBrowser.open(array, index);
+    }
+
+    function DeletePicture(mark) {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        var index = GetIndexOfJSONByMark(mark);
+        var url = arrData[index].picture;
+
+        if (arrData[index].type == "0") {
+            appcan.file.remove({
+                filePath: url,
+                callback: function (err, data, dataType, optId) { }
+            });
+        }
+        
+        //删除操作
+        arrData.splice(index, 1);
+        appcan.locStorage.val("ArrData", arrData);
+
+        appcan.window.evaluateScript({
+            name: "PictureView",
+            scriptContent: "Refurbish()"
+        });
+    }
+
+    //待实现功能（优化）
+    function IsExists() {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        var FilePath;
+        for (var i in arrData) {
+            FilePath = "";
+            if (arrData[i].type == "1") {//只判断从相册添加的图片
+                FilePath = arrData[i].picture;
+                alert(i + ": " + FilePath);
+            }
+            appcan.file.exists({
+                filePath: FilePath,
+                callback: function (err, data, dataType, optId) {
+                    if (data == 1) {
+                        //文件存在
+                    } else {
+                        //文件不存在
+                        arrData.splice(i, 1);
+                    }
+                }
+            });
+        }
+        appcan.locStorage.val("ArrData", arrData);
+
+        appcan.window.evaluateScript({
+            name: "PictureView",
+            scriptContent: "Refurbish()"
+        });
+    }
+    
+    //获取给定路径的图片索引
+    function GetIndexOfJSON(value) {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        for (var i in arrData) {
+            if (arrData[i].picture == value) {
+                return i;
+            }
+        }
+    }
+    
+    function GetIndexOfJSONByMark(mark) {
+        var arrData = JSON.parse(appcan.locStorage.val("ArrData"));
+        for (var i in arrData) {
+            if (arrData[i].mark== mark) {
+                return i;
+            }
+        }
+    }
+
+</script>
+</html>

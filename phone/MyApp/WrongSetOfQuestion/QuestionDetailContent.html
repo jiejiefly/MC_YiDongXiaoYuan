@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="QuestionDetailContent/css/main.css">
+</head>
+<body class="um-vp bc-bg">
+    <div id="divLoading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="divContent" style="display:none; padding:0.625em 0;">
+        <!-- 选这题 -->
+        <div class="c-bg3 uinn umar-a choice" style="display:none;">
+            <div>题干</div>
+            <div class="border-diy bc-border">
+                <div class="uinn tx-l choiceContent"></div>
+                <div class="uinn tx-l">
+                    <span>A.</span>
+                    <span class="choiceA"></span>
+                </div>
+                <div class="uinn tx-l">
+                    <span>B.</span>
+                    <span class="choiceB"></span>
+                </div>
+                <div class="uinn tx-l">
+                    <span>C.</span>
+                    <span class="choiceC"></span>
+                </div>
+                <div class="uinn tx-l">
+                    <span>D.</span>
+                    <span class="choiceD"></span>
+                </div>
+            </div>
+            <div class="myChoiceAnswer" style="display:none;">
+                <div class="umar-t">我的答案</div>
+                <div class="border-diy bc-border uinn tx-l choiceAnswer"></div>
+            </div>
+            <div class="myStandardChoiceAnswer c-txt1" style="display:none;">
+                <div class="umar-t">正确答案</div>
+                <div class="border-diy bc-border uinn tx-l choiceStandardAnswer"></div>
+                <div class="umar-t">答案解析</div>
+                <div class="border-diy bc-border uinn tx-l choiceAnalysis"></div>
+            </div>
+        </div>
+        <!-- 填空题/简答题 -->
+        <div class="c-bg3 uinn umar-a write" style="display:none">
+            <div>题干</div>
+            <div class="border-diy bc-border uinn tx-l writeContent"></div>
+            <div class="myWriteAnswer" style="display:none;">
+                <div class="umar-t">我的答案</div>
+                <div class="border-diy bc-border uinn tx-l writeAnswer"></div>
+            </div>
+            <div class="myStandardWriteAnswer c-txt1" style="display:none;">
+                <div class="umar-t">正确答案</div>
+                <div class="border-diy bc-border uinn tx-l writeStandardAnswer"></div>
+                <div class="umar-t">答案解析</div>
+                <div class="border-diy bc-border uinn tx-l writeAnalysis"></div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/appcan.js"></script>
+    <script src="../../js/appcan.control.js"></script>
+    <script src="../../js/angular.min.js"></script>
+    <script src="../../JsonData/WrongSetOfQuestion.js"></script>
+    <script src="../../js/Common.js"></script>
+</body>
+<script>
+    var QuestionData;
+    var index = 0;
+    appcan.ready(function () {
+        QuestionData = appcan.locStorage.val("WrongQuestionData");
+        QuestionData = JSON.parse(QuestionData);
+        ShowQuestion(index);
+
+        $("#divLoading").hide();
+        $("#divContent").show();
+    });
+
+    function ShowQuestion(index) {
+        if (QuestionData[index].QuestionType == "SingleChoice" || QuestionData[index].QuestionType == "MutiChoice") {
+            $(".write").hide();
+            $(".choice").show();
+            $(".choiceContent").html(QuestionData[index].Content);
+            $(".choiceA").html(QuestionData[index].Choice[0].Content);
+            $(".choiceB").html(QuestionData[index].Choice[1].Content);
+            $(".choiceC").html(QuestionData[index].Choice[2].Content);
+            $(".choiceD").html(QuestionData[index].Choice[3].Content);
+            $(".choiceAnswer").html(QuestionData[index].MyAnswer);
+            $(".choiceStandardAnswer").html(QuestionData[index].StandardAnswer);
+            if(QuestionData[index].Analysis == ""){
+                $(".choiceAnalysis").html("略");
+            }else{
+                $(".choiceAnalysis").html(QuestionData[index].Analysis);
+            }
+        }else if (QuestionData[index].QuestionType == "SimpleAnswer" || QuestionData[index].QuestionType == "FillInBlank"){
+            $(".choice").hide();
+            $(".write").show();
+            $(".writeContent").html(QuestionData[index].Content);
+            $(".writeAnswer").html(QuestionData[index].MyAnswer);
+            $(".writeStandardAnswer").html(QuestionData[index].StandardAnswer);
+            if(QuestionData[index].Analysis == ""){
+                $(".writeAnalysis").html("略");
+            }else{
+                $(".writeAnalysis").html(QuestionData[index].Analysis);
+            }
+        }else if (QuestionData[index].QuestionType == "YesNo"){
+            
+        }else if (QuestionData[index].QuestionType == "Composite"){
+            
+        }
+    }
+
+
+    function Previous() {
+        if (index == 0) {
+            appcan.window.openToast({
+                msg: "已经是第一题了",
+                duration: 1500,
+                position: 5,
+                type: 0
+            });
+        } else {
+            --index;
+            ShowQuestion(index);
+
+            $(".myChoiceAnswer").hide();
+            $(".myWriteAnswer").hide();
+            $(".myStandardChoiceAnswer").hide();
+            $(".myStandardWriteAnswer").hide();
+        }
+    }
+
+    function Next() {
+        if (index == QuestionData.length - 1) {
+            appcan.window.openToast({
+                msg: "已经是最后一题了",
+                duration: 1500,
+                position: 5,
+                type: 0
+            });
+        } else {
+            ++index;
+            ShowQuestion(index);
+
+            $(".myChoiceAnswer").hide();
+            $(".myWriteAnswer").hide();
+            $(".myStandardChoiceAnswer").hide();
+            $(".myStandardWriteAnswer").hide();
+        }
+    }
+
+    function MyAnswer() {
+        if (QuestionData[index].QuestionType == "SingleChoice") {
+            $(".myChoiceAnswer").show();
+        } else {
+            $(".myWriteAnswer").show();
+        }
+
+    }
+
+    function StandardAnswer() {
+        if (QuestionData[index].QuestionType == "SingleChoice") {
+            $(".myStandardChoiceAnswer").show();
+        } else {
+            $(".myStandardWriteAnswer").show();
+        }
+    }
+</script>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>添加联系人或分组浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="../css/animate.css"/>
+        <link rel="stylesheet" href="AddContactAndGroupContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div id="divLoading" class="ub-f1">
+            <div class="loading">
+                <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+            </div>
+        </div>
+        <div id = "divContent" style = "display:none;">
+            <div class = "body-uinn">
+                <!-- 添加练习人或分组开始 -->
+                <div id = "mainContent">
+                    <div class = "c-wh ub ubb bc-border" id = "addContac">
+                        <div><img src="AddContactAndGroupContent/css/myImg/a_contact.png" class="head-icon"></div>
+                        <div class = "text-uinn">添加联系人</div>
+                    </div>
+                    <div class = "c-wh ub" id = "addGroup">
+                        <div><img src="AddContactAndGroupContent/css/myImg/a_group.png" class="head-icon"></div>
+                        <div class = "text-uinn">新建分组</div>
+                    </div>
+                </div>
+                <!-- 添加练习人或分组结束 -->
+                <!-- 查找联系人开始 -->
+                <div id = "addContactContent" style = "display:none">
+                    <div class = "uinn c-wh">
+                        <div class="uinput ub ub-f1 ubb">
+                            <div class="uinn fa fa-search"></div>
+                            <input placeholder="输入手机号/用户名" type="text" class="ub-f1" style="outline:none;" id="searchBox">
+                        </div>
+                        <div class = "ub ub-pj umar-t">
+                            <div id = "btnCancelContact" class="nav-btn bc-cancel bc-text-head umar-l" style = "border-radius: 0.3em;">取消</div>
+                            <div id = "btnSearchContact" class="nav-btn bc-head bc-text-head umar-l" style = "border-radius: 0.3em;">查找</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 查找联系人开始 -->
+                <!-- 新建分组开始 -->
+                <div id = "addGroupContent" style = "display:none">
+                    <div class = "c-wh">
+                        <div class = "ub uinn">
+                            <div class = "">
+                                <!-- 群组名称： -->
+                                <div><img src="AddContactAndGroupContent/css/myImg/groupname.png" class="head-icon2"></div>
+                            </div>
+                            <div class="uinput ub ub-f1 ubb umar-r">
+                                <input placeholder="群组名称" type="text" class="ub-f1" style="outline:none;" id="groupName">
+                            </div>
+                        </div>
+                        <div class = "uinn">
+                            <div class = "ub">
+                                <!-- 群组简介： -->
+                                <div><img src="AddContactAndGroupContent/css/myImg/groupbrief.png" class="head-icon2"></div>
+                                <div class="uinput ub ub-f1 ubb umar-r">
+                                    <input placeholder="群组简介" type="text" class="ub-f1" style="outline:none;" id="groupBrief">
+                                </div>
+                            </div>
+                            <div class = "ub ub-pj umar-t uinn">
+                                <div id = "btnCancelGroup" class="nav-btn bc-cancel bc-text-head umar-l" style = "border-radius: 0.3em;">取消</div>
+                                <div id = "btnConfirmGroup" class="nav-btn bc-head bc-text-head umar-l" style = "border-radius: 0.3em;">确定</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- 新建分组结束 -->
+                <!-- 显示搜索到的联系人内容 开始 -->
+                <div class = "search-uinn searchContacts"></div>
+                <!-- 显示搜索到的联系人内容 结束 -->
+            </div>
+        </div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/Common.js"></script>
+    </body>
+    <script>
+        var index = 1;
+        appcan.ready(function() {
+            $("#divContent").show();
+            $("#divLoading").hide();
+        });
+        //点击添加联系人
+        appcan.button("#addContac", "btn-act2", function(){
+            $("#mainContent").hide().addClass("animated fadeOut");
+            $("#addContactContent").show().addClass("animated fadeIn");
+        });
+        //点击添加分组
+        appcan.button("#addGroup", "btn-act2", function(){
+            $("#mainContent").hide().addClass("animated fadeOut");
+            $("#addGroupContent").show().addClass("animated fadeIn");
+        });
+        //在查找联系人部分点击“查找”
+        appcan.button("#btnSearchContact", "ani-act", function(){
+            appcan.window.openToast("正在为您查找...");
+            var keyWord = $("#searchBox").val().trim();
+            PagingLoading(keyWord, 1);
+            index ++;
+        });
+        //在查找联系人部分点击“取消”
+        appcan.button("#btnCancelContact", "ani-act", function(){
+            $("#addContactContent").hide().removeClass("animated fadeIn");
+            $("#mainContent").show().removeClass("fadeOut").addClass("fadeIn");
+        });
+        //在添加分组部分点击“确定”
+        appcan.button("#btnConfirmGroup", "ani-act", function(){
+             appcan.window.openToast("正在创建群组...");
+             var groupName = $("#groupName").val();
+             var groupBrief = $("#groupBrief").val();
+             var myUserID = appcan.locStorage.val("MyUserID");
+
+             var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+             var Url = apiConfig.CreateGroup.Url;
+             var Type = apiConfig.CreateGroup.Type;
+             var parameters = '{"GroupId": "","EaseMobGoupId": "","GroupName": "'+groupName+'","Description": "'+groupBrief+'","GroupOwner": "'+myUserID+'","GroupType": "自定义"}';
+             var url = GetMappingUrl(Url, parameters);
+             var isSuccess = 0;
+             $.ajax({
+             url: url,
+             type: Type,
+             data: parameters,
+             dataType: "json",
+             contentType:"application/json; charset = utf-8",
+             success:function (data) {
+                isSuccess = 1;
+                appcan.locStorage.setVal("AddGroupData", data);
+                uexWindow.evaluateMultiPopoverScript("MainTab", "content", "MyContactContent", "AddGroup()");
+                appcan.window.evaluateScript ("AddContactAndGroup", "CloseWindow ()");
+             },
+             complete:function () {
+                if (isSuccess == 0) {
+                    appcan.window.open("未知错误!", 1500);
+                }
+             }
+        });
+
+        });
+        //在添加分组部分点击“取消”
+        appcan.button("#btnCancelGroup", "ani-act", function(){
+            $("#addGroupContent").hide().removeClass("animated fadeIn");
+            $("#mainContent").show().removeClass("fadeOut").addClass("fadeIn");
+        });
+
+        //分页加载搜索数据 1--根据条件查找； 2--分页加载
+        function PagingLoading(keyWord, getType){
+            var token = appcan.locStorage.val("Token");
+            var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+            var Url = apiConfig.SearchContacts.Url;
+            var Type = apiConfig.SearchContacts.Type;
+            var url = '';
+            if(getType == 1){
+                url = Url +"?keyword="+ keyWord +"&index=1&size=10";
+            }else{
+                url = Url +"?keyword="+ keyWord +"&index="+ index +"&size=10";
+            }
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType: "application/json; charset = utf-8",
+                success: function (data) {
+                    isSuccess = 1;
+                    var length = data.Result.length;
+                    if(length > 0){
+                        var searchData = data.Result;
+                        var html = '';
+                        for(var i in searchData){
+                            var displayName = searchData[i].DisplayName;
+                            var head = searchData[i].PortraitUri;
+                            var userName = searchData[i].UserName;
+                            if(head == ""){
+                                head = "../MyContactContent/css/myImg/NoContactIcon.png";
+                            }
+                            html += '<ul class="uinn-a7 c-wh searchedList ubb ub bc-border" userName = "'+ userName +'">';
+                            html += '<li class="bc-text ub-ac lis ub">';
+                            html += '<div class="ub-img umar-img">';
+                            html += '<img src="'+ head +'" alt="头像" class = "lis-icon-s"/>';
+                            html += '</div>';
+                            html += '<div class="lv_title ub-f1 marg-l ub ub-ver ut-m line1 contactName">' + displayName + '</div>';
+                            html += '</li>';
+                            html += '</ul>';
+
+                        }
+                        if(getType == 1){
+                            $(".searchContacts").html(html);
+                        }else{
+                            $(".searchContacts").append(html);
+                        }
+                        appcan.window.closeToast();
+                        ClickEvent();
+                    }else{
+                        appcan.window.openToast("没有找到您想要的好友。", 1500);
+                        var temp = '<div class = "tx-c sc-text"style = "margin-top: 2em;">无结果</div>';
+                        $(".searchContacts").html(temp);
+                    }
+                },
+                complete: function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast("加载失败。", 1500);
+                    }
+                }
+            });
+        }
+
+        function ClickEvent(){
+            appcan.button(".searchedList", "btn-act", function(){
+                var userName = $(this).attr("userName");
+                appcan.locStorage.setVal("contactID", userName);
+                appcan.window.open("AddContactDetail", "AddContactDetail.html", 10);
+            });
+        }
+       
+ </script>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    <head>
+        <title>群聊中心浮动窗口</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="../css/ui-box.css">
+        <link rel="stylesheet" href="../css/ui-base.css">
+        <link rel="stylesheet" href="../css/ui-color.css">
+        <link rel="stylesheet" href="../css/appcan.icon.css">
+        <link rel="stylesheet" href="../css/appcan.control.css">
+        <link rel="stylesheet" href="ChatroomCenterContent/css/main.css">
+    </head>
+    <body class="um-vp bc-bg" ontouchstart>
+        <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+        </div>
+        <div id = "divContent" style = "display:none">
+            <div class="padding-c">
+                <div class="c-wh uinn contactsContent">
+                </div>
+                <div id = "blockMsg">
+                    <div  id = "zhanyou" class="c-wh umar-t uinn ub ub-pj">
+                        <div>接收群消息</div>
+                        <div class="switch uba bc-border switch-mini" data-checked="true">
+                            <div class="switch-btn sc-bg-active "></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="uinn">
+                    <div class="btn ub ub-ac sc-bg-alert bc-text-head ub-pc uc-a1 " id="btnDeleteAndExit">
+                        删除并退出
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/Common.js"></script>
+ </body>
+    <script>
+        appcan.ready(function() {
+            $("#divContent").show();
+            $(".spinner").hide();
+            var myUserName = appcan.locStorage.val("MyUserID");
+            var groupOwner = appcan.locStorage.val("GroupOwner");
+            if(myUserName == groupOwner){
+                //环信里群主不能屏蔽群消息，所以对于群主将这块隐藏
+                $("#blockMsg").hide();
+            }
+            ShowGroupMembers ();
+            GetGroupDetailInfo ();
+        });
+
+        function ShowGroupMembers () {
+            $.when(GetGroupMembers ()).done(function(data){
+                var contacts = data.Result;
+                appcan.locStorage.setVal("GroupMembers", contacts);
+                var len = contacts.length-1;
+                var html = '';
+                for(var i in contacts){
+                    var addMember = "ChatroomCenterContent/css/img/add_member.png";
+                    var head = contacts[i].PortraitUri;
+                    if(head == ""){
+                        head = "ChatroomCenterContent/css/img/NoContactIcon.png";
+                    }
+                    var name = contacts[i].Name;
+                    var userName = contacts[i].UserName;
+                    var isNextLine = i%4;
+                    if(isNextLine == 0){
+                        //一行的开始，加上开始的div
+                        html += '<div class="line ub">';
+                        html += '<figure userName = "'+ userName +'" class = "groupMember">';
+                        html += '<img src="'+ head +'" alt=""/>';
+                        html += '<figcaption class = "ub ub-pc">';
+                        html += '<div>'+ name +'</div>';
+                        html += '</figcaption></figure>';
+                        if(i == len){
+                            html += '<figure class = "img-margin-l padding-i addContacts">';
+                            html += '<img src="'+ addMember +'" alt="" style = "width: 90%;height: 90%;"/>';
+                            html += '</figure></div>';
+                        }
+                    }else if(isNextLine == 3){
+                        //换行,加上结束的div
+                        html += '<figure class = "img-margin-l groupMember" userName = "'+ userName +'">';
+                        html += '<img src="'+ head +'" alt=""/>';
+                        html += '<figcaption class = "ub ub-pc">';
+                        html += '<div>'+ name +'</div>';
+                        html += '</figcaption></figure>';
+                        html += '</div>';
+                        if(i == len){
+                            html += '<div class="line ub">';
+                            html += '<figure class = "addContacts">';
+                            html += '<img src="'+ addMember +'" alt="" style = "width: 90%;height: 90%;"/>';
+                            html += '</figure></div>';
+                        }
+                    }else{
+                        html += '<figure class = "img-margin-l groupMember" userName = "'+ userName +'">';
+                        html += '<img src="'+ head +'" alt=""/>';
+                        html += '<figcaption class = "ub ub-pc">';
+                        html += '<div>'+ name +'</div>';
+                        html += '</figcaption></figure>';
+                        if( i == len){
+                            html += '<figure class = "img-margin-l padding-i addContacts">';
+                            html += '<img src="'+ addMember +'" alt="" style = "width: 90%;height: 90%;"/>';
+                            html += '</figure></div>';
+                        }
+                    }
+                }
+                $(".contactsContent").html(html);
+                ClickEvent();
+            });
+        }
+
+        function GetGroupMembers () {
+            var token = appcan.locStorage.val("Token");
+            var userName = appcan.locStorage.val("MyUserID");
+            var groupName = appcan.locStorage.val("GroupName");
+            var groupId = appcan.locStorage.val("GroupId");
+            var easeMobGroupId = appcan.locStorage.val("EaseMobId");
+            var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+            var Url = apiConfig.GetGroupMembers.Url;
+            var Type = apiConfig.GetGroupMembers.Type;
+            var parameters = { "groupId": groupId };
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            var defer = $.Deferred();
+            $.ajax({
+                url: url,
+                type: Type,
+                data: parameters,
+                dataType: "json",
+                contentType:"application/json; charset = utf-8",
+                success:function (data) {
+                    isSuccess = 1;
+                    defer.resolve(data);
+                },
+                complete:function () {
+                    if (isSuccess == 0) {
+                    }
+                }
+            });
+            return defer.promise();
+        }
+
+        function ClickEvent(){
+            $(".addContacts").on("tap", function () {
+                $(this).addClass("click-figure");
+                setTimeout("RemoveClass ()", 200 );
+                appcan.window.open("AddMembersToGroup", "AddMembersToGroup.html", 10);
+            });
+
+            $(".groupMember").on("tap", function(){
+                $(this).addClass("click-figure");
+                setTimeout("RemoveClass ()", 200 );
+                var userName = $(this).attr("userName");
+                appcan.locStorage.setVal("contactID", userName);
+                appcan.window.open("SingleContact", "../MyContact/SingleContact.html", 10);
+            });
+
+            appcan.button("#btnDeleteAndExit", "ani-act", function(){
+                var myUserName = appcan.locStorage.val("MyUserID");
+                var groupOwner = appcan.locStorage.val("GroupOwner");
+                if(myUserName == groupOwner){
+                    //将组删除
+                    appcan.window.confirm({
+                        title : "提示",
+                        content : "您是当前的群主,退出后群将解散,是否继续?",
+                        buttons : ['确定', '取消'],
+                        callback : function(err, data, dataType, optId) {
+                            if(data == 0){
+                                DeleteGroup();
+                            }
+                        }
+                    });
+                }else{
+                    //退出群组
+                    RemoveMemberFromGroup (myUserName);
+                }
+            });
+        }
+
+        function RemoveClass () {
+            $(".addContacts, figure").removeClass("click-figure");
+        }
+
+        function TipInfo () {
+            appcan.window.openToast("添加成功！", 2000);
+        }
+
+        //删除分组
+        function DeleteGroup () {
+            appcan.window.openToast("正在删除...");
+            var groupId = appcan.locStorage.val("GroupId");
+            var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+            var Url = apiConfig.DeleteGroup.Url;
+            var Type = apiConfig.DeleteGroup.Type;
+            var parameters = { "groupId": groupId };
+            var url = GetMappingUrl(Url, parameters);
+            var isSuccess = 0;
+            $.ajax({
+                url: url,
+                type: Type,
+                dataType: "json",
+                contentType:"application/json; charset = utf-8",
+                success:function (data) {
+                    isSuccess = 1;
+                    uexWindow.evaluateMultiPopoverScript("MainTab", "content", "MyContactContent", "DeleteGroup('"+ groupId +"')");
+                    appcan.window.evaluateScript("Chatroom", "CloseWindow()");
+                    appcan.window.evaluateScript("ChatroomCenter", "CloseWindow()");
+                },
+                complete:function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast(" Delete Group Error. ", 2000);
+                    }
+                }
+            });
+
+        }
+
+        //退出群组
+        function RemoveMemberFromGroup (myUserName) {
+            var groupId = appcan.locStorage.val("GroupId");
+            var apiConfig = eval('(' + appcan.locStorage.val("ApiConfig") + ')');
+            var Url = apiConfig.RemoveMemberFromGroup.Url;
+            var Type = apiConfig.RemoveMemberFromGroup.Type;
+            var isSuccess = 0;
+            $.ajax({
+                url: Url,
+                type: Type,
+                data:'{"GroupId":"'+ groupId +'", "UserName":"'+ myUserName +'"}',
+                dataType: "json",
+                contentType:"application/json; charset = utf-8",
+                success:function (data) {
+                    isSuccess = 1;
+                    uexWindow.evaluateMultiPopoverScript("MainTab", "content", "MyContactContent", "DeleteGroup('"+ groupId +"')");
+                    appcan.window.evaluateScript("Chatroom", "CloseWindow()");
+                    appcan.window.evaluateScript("ChatroomCenter", "CloseWindow()");
+                },
+                complete:function () {
+                    if (isSuccess == 0) {
+                        appcan.window.openToast(" Exit Group Error. ", 2000);
+                    }
+                }
+            });
+        }
+
+        //获取分组的详细信息
+        function GetGroupDetailInfo () {
+            var easeMobGroupId = appcan.locStorage.val("EaseMobId");
+            uexEasemob.getGroup('{"groupId":"'+ easeMobGroupId +'", "loadCache":"false"}');
+        }
+
+        function ChangeSwitchBtnStatus (data) {
+            if(data == "false"){
+                $(".switch").attr("data-checked", "true").addClass("bc-head");
+            }else{
+                $(".switch").attr("data-checked", "false").removeClass("bc-head");
+            }
+        }
+
+        appcan.switchBtn(".switch", function(obj, value) {
+            var easeMobId = appcan.locStorage.val("EaseMobId");
+            if(value == true){
+                //接收群消息
+                uexEasemob.unblockGroupMessage('{"groupId":"'+ easeMobId +'"}');
+            }else{
+                //屏蔽群消息
+                uexEasemob.blockGroupMessage('{"groupId":"'+ easeMobId +'"}');
+            }
+        });
+ </script>
+</html>

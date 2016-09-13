@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../../css/ui-base.css">
+    <link rel="stylesheet" href="../../../css/ui-box.css">
+    <link rel="stylesheet" href="../../../css/ui-color.css">
+    <link rel="stylesheet" href="EmailDetailsContent/css/main.css">
+</head>
+<body ng-app="EmailDetailsModule" ng-controller="EmailDetailsController" class="ub um-vp bc-bg ub-ver uinn" style="margin:0 0.8em 0 0.8em;" ontouchstart>
+<div id="EmailTitle" class="t-bg tx-l uinn" ng-bind-html="EmailDetails.EmailTitle|to_trusted"></div>
+<div id="EmailDetailsBox" class="bottom">
+    <div id="AddresserNick" class="t-gra tx-l ulev-1 uinn ufl" ng-bind="EmailDetails.AddresserNick"></div>
+    <div id="EmailDetails" style="display: none;" class="t-gra tx-l ulev-1 uinn ufl">
+        <table cellspacing="2" cellpadding="0">
+            <tr>
+                <td>发件人：</td>
+                <td class="tdPadding" ng-bind="EmailDetails.AddresserNick"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="tdPadding" ng-bind="EmailDetails.Addresser"></td>
+            </tr>
+            <tr>
+                <td>收件人：</td>
+                <td class="tdPadding" ng-bind="EmailDetails.AddresseeNick"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="tdPadding" ng-bind="EmailDetails.Addressee"></td>
+            </tr>
+            <tr ng-if="EmailDetails.CCArr != ''">
+                <td>抄送：</td>
+                <td id="ChaoSong">
+                    <table ng-repeat="CCData in EmailDetails.CCArr" cellspacing="2" cellpadding="0">
+                        <tr>
+                            <td ng-bind="CCData.CCNick"></td>
+                        </tr>
+                        <tr>
+                            <td ng-bind="CCData.CC"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>时间：</td>
+                <td class="tdPadding" ng-bind="EmailDetails.DateTime"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="Details" class="t-gra tx-l ulev-1 uinn ufr">详情</div>
+</div>
+<br/>
+
+<div id="EmailContent" ng-bind-html="EmailDetails.EmailContent|to_trusted"></div>
+
+</body>
+<script src="../../../js/appcan.js"></script>
+<script src="../../../js/appcan.control.js"></script>
+<script src="../../../js/jquery.min.js"></script>
+<script src="../../../js/Common.js"></script>
+<script src="../../../js/angular.min.js"></script>
+<script>
+    var Email = angular.module("EmailDetailsModule", []);
+    Email.controller("EmailDetailsController", function ($scope) {
+        GetEmailDetails($scope);
+    });
+
+    Email.filter('to_trusted', ['$sce', function ($sce) {
+        return function (text) {
+            return $sce.trustAsHtml(text);
+        };
+    }]);
+
+    function GetEmailDetails($scope) {
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var emailId = appcan.locStorage.val("EmailId");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var getEmailDetailsUrl = apiConfig.GetEmailDetails.Url;
+        var getEmailDetailsType = apiConfig.GetEmailDetails.Type;
+        var getEmailDetailsParameters = {"emailId": emailId, "accessToken": token};
+        getEmailDetailsUrl = GetMappingUrl(getEmailDetailsUrl, getEmailDetailsParameters);
+        $.ajax({
+            url: getEmailDetailsUrl,
+            type: getEmailDetailsType,
+            data: getEmailDetailsParameters,
+            dataType: "json",
+            success: function (msg) {
+                isSuccess = 1;
+                $scope.EmailDetails = msg;
+                $scope.$apply();
+            },
+            complete: function (xhr, status) {
+                if (isSuccess == 0) {
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '获取邮件详情失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                GetEmailDetails($scope);
+                            }
+                            else if (data == 1) {
+                                appcan.window.evaluateScript({
+                                    name: 'EmailDetails',
+                                    scriptContent: 'CloseWindow()'
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });//ajax结束
+    }
+
+    appcan.ready(function () {
+        //appcan.initBounce();
+    });
+    $("#Details").on("click", function () {
+        var detailsStatus = $("#EmailDetails").is(":visible");
+        if (detailsStatus) {
+            $("#EmailDetails").slideToggle("slow", function () {
+                $("#AddresserNick").show();
+            });
+        } else {
+            $("#AddresserNick").hide(function () {
+                $("#EmailDetails").slideToggle();
+            });
+        }
+    })
+</script>
+</html>

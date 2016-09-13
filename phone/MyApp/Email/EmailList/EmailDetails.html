@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../css/ui-box.css">
+    <link rel="stylesheet" href="../../../css/ui-base.css">
+    <link rel="stylesheet" href="../../../css/ui-color.css">
+    <link rel="stylesheet" href="../../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../../css/appcan.control.css">
+</head>
+<body class="um-vp " ontouchstart>
+<div id="page_0" class="up ub ub-ver bc-bg" tabindex="0">
+    <!--header开始-->
+    <div id="header" class="uh bc-text-head ub bc-head">
+        <div class="nav-btn" id="nav-left">
+            <div class="fa fa-angle-left fa-2x"></div>
+        </div>
+        <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">AppCan</h1>
+
+        <div class="nav-btn nav-bt" id="nav-right"></div>
+    </div>
+    <!--header结束--><!--content开始-->
+    <div id="content" class="ub-f1 tx-l">
+
+    </div>
+    <!--content结束-->
+    <div id="tabview" class="uf sc-bg ubt sc-border-tab">
+        <div class="uf t-bla ub tab_i">
+            <div class="ulev-1 ub ub-f1" id="Reply">
+                <div class="ub-f1 ub ub-ver item ub-ac sc-text-tab">
+                    <div class="ub-f1 fa fa-reply fa-2x tx-c"></div>
+                </div>
+            </div>
+            <div class="ulev-1 ub ub-f1" id="ReplyAll">
+                <div class="ub-f1 ub ub-ver item ub-ac sc-text-tab">
+                    <div class="ub-f1 fa fa-reply-all fa-2x tx-c"></div>
+                </div>
+            </div>
+            <div class="ulev-1 ub ub-f1" id="Share">
+                <div class="ub-f1 ub ub-ver item ub-ac sc-text-tab">
+                    <div class="ub-f1 fa fa-share fa-2x tx-c"></div>
+                </div>
+            </div>
+            <div class="ulev-1 ub ub-f1" id="Delete">
+                <div class="ub-f1 ub ub-ver item ub-ac sc-text-tab">
+                    <div class="ub-f1 fa fa-trash-o fa-2x tx-c"></div>
+                </div>
+            </div>
+            <div class="ulev-1 ub ub-f1" id="Collect">
+                <div class="ub-f1 ub ub-ver item ub-ac sc-text-tab">
+                    <div class="ub-f1 fa fa-star-o fa-2x tx-c"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="../../../js/appcan.js"></script>
+<script src="../../../js/appcan.control.js"></script>
+<script src="../../../js/Common.js"></script>
+</body>
+<script>
+    var addresser = appcan.locStorage.val("addresser");
+    $("h1").html(addresser);
+    appcan.ready(function () {
+        var titHeight = $('#header').offset().height;
+        appcan.frame.open("content", "EmailDetailsContent.html", 0, titHeight);
+        window.onorientationchange = window.onresize = function () {
+            appcan.frame.resize("content", 0, titHeight);
+        }
+    });
+    appcan.button(".nav-btn", "btn-act", function () {
+        appcan.window.close(-1);
+    });
+
+    function CloseWindow() {
+        appcan.close.window(-1);
+    }
+
+    //回复
+    $("#Reply").on("click",function(){
+        appcan.window.open("ReplyEmail","ReplyEmail.html",5);
+    });
+
+    //回复所有人
+    $("#ReplyAll").on("click",function(){
+        appcan.window.open("ReplyEmail","ReplyEmail.html",5);
+    });
+
+    //转发
+    $("#Share").on("click",function(){
+        appcan.window.open("ShereEmail","ShereEmail.html",5);
+    });
+
+    //删除
+    $("#Delete").on("click",function(){
+        appcan.window.confirm({
+            title: '确认信息',
+            content: '是否删除此邮件！',
+            buttons: ['确定', '取消'],
+            callback: function (err, data, dataType, optId) {
+                if (err) {
+                    return;
+                }
+                if (data == 0) {
+                    DeleteEmail()
+                }
+                else if (data == 1) {
+                }
+            }
+        });
+    });
+
+    //标星
+    $("#Collect").on("click",function(){
+        CollectEmail($(this));
+    });
+
+    function DeleteEmail(){
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var emailId = appcan.locStorage.val("EmailId");
+        var apiConfig = JSON.parse(appcan.locStorage.val("ApiConfig"));
+        var deleteEmailUrl = apiConfig.DeleteEmail.Url;
+        var deleteEmailType = apiConfig.DeleteEmail.Type;
+        var deleteEmailParameters = {"EmailId":emailId,"accessToken":token};
+        deleteEmailUrl = GetMappingUrl(deleteEmailUrl,deleteEmailParameters);
+        $.ajax({
+            url: deleteEmailUrl,
+            dataType: "json",
+            Type: deleteEmailType,
+            data: deleteEmailParameters,
+            success: function(msg){
+                isSuccess = 1;
+                appcan.window.openToast( '删除成功！', '1000' );
+                CloseWindow();
+            },
+            complete: function(){
+                if(isSuccess==0){
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '发送失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                DeleteEmail();
+                            }
+                            else if (data == 1) {
+                                CloseWindow();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+    function CollectEmail(obj){
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var emailId = appcan.locStorage.val("EmailId");
+        var apiConfig = JSON.parse(appcan.locStorage.val("ApiConfig"));
+        var collectEmailUrl = apiConfig.CollectEmail.Url;
+        var collectEmailType = apiConfig.CollectEmail.Type;
+        var collectEmailParameters = {"EmailId":emailId,"accessToken":token};
+        collectEmailUrl = GetMappingUrl(collectEmailUrl,collectEmailParameters);
+        $.ajax({
+            url: collectEmailUrl,
+            dataType: "json",
+            Type: collectEmailType,
+            data: collectEmailParameters,
+            success: function(msg){
+                isSuccess = 1;
+                obj.find(".fa").removeClass("fa-star-o").addClass("fa-star").css("color","gold");
+            },
+            complete: function(){
+                if(isSuccess==0){
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '设置星标邮件失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                CollectEmail();
+                            }
+                            else if (data == 1) {
+                                CloseWindow();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+
+</script>
+</html>

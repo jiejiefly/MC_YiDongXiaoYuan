@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.tab.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="../../css/project/new.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart>
+<div class="conbor uof">
+    <div class="consj"> 
+        <div class="ulev2 uin9">文件上传</div> 
+        <div class="umh1"></div>
+        <div class="uin10">上传文件的路径：</div> 
+        <div class="ubb ubt bc-border bc-bg tcxx breakword" id="data"></div> 
+        <div class="umh1"></div>
+        <div class="uin">
+            <div class="ub btn bc-text-head bc-btn ub-ac ub-pc" id="up"> 上传文件</div>
+        </div>
+        <div class="umh1"></div>
+        <div id="status" class="uhide">
+           <div class="uba  bc-border bc-bg  breakword umh1" >
+            <div class="umh1 bc-head"style="width: 0%" id="percentage"></div>
+        </div> 
+       <div class="umh1"></div>
+        <div id="per" class="tx-c">
+            0%
+        </div>
+        </div>
+    </div>
+</div>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>	
+<script src="../../js/appcan.tab.js"></script>
+</body>
+<script>
+    appcan.ready(function(){
+    	appcan.initBounce();
+    	uexDevice.cbGetInfo=function (opCode,dataType,data){
+            var device = eval('('+data+')');
+            var connectStatus=device.connectStatus;
+            if(connectStatus!=null&&connectStatus.length>0){
+                if(connectStatus==-1){
+                    alert('网络错误');  
+                }
+            }
+        }
+    	uexDevice.getInfo('13');
+    	uexWidgetOne.cbError = function(opCode,errorCode,errorInfo){
+                    alert(errorInfo);
+        }
+        uexUploaderMgr.onStatus = function(opCode,fileSize,percent,serverPath,status){
+            switch (status) {
+                //Uex.cUpLoading=0  Uex.cFinishUpLoad=1 Uex.cUpLoadError=2
+                case 0:
+                    $('#percentage').css("width",percent+"%");
+                    $('#per').html(percent+"%");
+                    break;
+                case 1:
+                    alert("上传成功，服务器路径为"+serverPath);
+                    $('#up').html('上传文件');
+                    $('#status')[0].className="uhide";
+                    isUp = false;
+                    uexUploaderMgr.closeUploader(1);
+                    $('#up').html('上传');
+                    break;
+                case 2:
+                    alert("上传失败");
+                    $('#status')[0].className="uhide";
+                    isUp = false;
+                    uexUploaderMgr.closeUploader(1);
+                    $('#up').html('上传');
+                    break;
+            }
+        }
+            
+        uexUploaderMgr.cbCreateUploader =function(opCode,dataType,data){
+            if(data == 0){
+               // alert("创建成功");
+            }else{
+              //  alert("创建失败");
+            }
+            
+        }
+    })
+    
+    var isUp = false;
+    appcan.button(".btn", "btn-act", function() {
+        if(!isUp){
+            upload();
+            $('#up').html('上传中');
+            $('#status')[0].className="uinn";
+            isUp = true;
+        }
+    })
+    
+    var uploadHttp = "http://te.3g2win.com/pidginimg/upload.php";
+    var filePath = 'res://pano_sphere2.jpg'
+    function upload(){
+        uexUploaderMgr.createUploader(1,uploadHttp);
+        uexUploaderMgr.uploadFile(1,filePath,"inputName",0);  
+    }
+</script>
+</html>

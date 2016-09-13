@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>群聊浮动窗口</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/ui-box.css">
+    <link rel="stylesheet" href="../css/ui-base.css">
+    <link rel="stylesheet" href="../css/ui-color.css">
+    <link rel="stylesheet" href="../css/appcan.icon.css">
+    <link rel="stylesheet" href="../css/appcan.control.css">
+    <link rel="stylesheet" href="ChatContent/css/main.css">
+    <style>
+        input{
+            color: black;
+            padding: 1px 6px;
+            margin-left:6px;
+        }
+        input[type="text"]{
+            padding: .2em .4em;
+            margin:.4em .6em;
+            font-size:1em;
+        }
+        input[type="button"]{
+            padding: .6em .8em;
+            margin:.4em .6em;
+            font-size:1.2em;
+        }
+    </style>
+</head>
+
+            
+
+<body class="um-vp c-wh"ontouchstart>
+    <div id="divLoading" class="ub-f1">
+        <div class="loading">
+            <span class="fa fa-spinner fa-pulse"></span>&nbsp;正在加载中，请稍后...
+        </div>
+    </div>
+    <div id="divContent" style="display:none;">
+        <div id = "chatContent"></div>
+    </div>
+    <div id = "bottom"></div>
+    <script src="../js/appcan.js"></script>
+    <script src="../js/appcan.control.js"></script>
+    <script src="../wgtRes/emojicons/emojson.js"></script>
+    <script src="../js/Common.js"></script>
+</body>
+<script>
+    var myId = appcan.locStorage.val("MyUserID");
+    var groupId = appcan.locStorage.val("EaseMobId");
+    var jsonstr = {
+                "emojicons": "res://emojicons/emojicons.xml",
+                "shares": "res://shares/shares.xml",
+                "placeHold": "请输入内容",
+                "touchDownImg": "res://1.png",
+                "dragOutsideImg": "res://2.png",
+                "textColor": "#FFF",
+                "textSize": "15.5"
+            };
+    appcan.ready(function() {
+        //window.location.hash = "#bottom"
+        appcan.frame.setBounce(0, function(type) {
+            //$("#pullstatus").html("开始下拉");
+        }, function(type) {
+            //$("#pullstatus").html("下拉超过临界点,产生事件了！");
+        }, function(type) {
+            //$("#pullstatus").html("松手了,产生事件了,开始更新数据！");
+            setTimeout(function(type) {
+                appcan.frame.resetBounce(type);
+                //$("#pullstatus").html("");
+                //demo.add(updateData);
+            }, 1000);
+        });
+        GetConversationData();
+        $("#divLoading").hide();
+        $("#divContent").show();
+        //openChatKeyboard();
+        uexChatKeyboard.open(JSON.stringify(jsonstr));
+        uexChatKeyboard.onCommit = function(json){
+            var strHtml = '';
+            var json = eval('(' + json + ')');
+            var commitText = json.emojiconsText;
+            uexEasemob.sendText('{"username":"'+groupId+'","chatType":"1","content":"'+commitText+'"}');
+            //window.location.hash = "#bottom";
+        }
+        uexChatKeyboard.onShareMenuItem = function(json){
+            if(json==0){CameraOpen();}
+            if(json==1){PhotoOpen();}
+            if(json==2){MapOpen();}
+        }
+
+        uexChatKeyboard.onVoiceAction = function(json){
+            var str=eval("("+json+")");
+            if(str.status==0){Voice();}
+            if(str.status==1){StopVoice();}
+            if(str.status==-1){return;}
+        }
+
+        uexChatKeyboard.onKeyBoardShow = function(data){
+            var contentHeight = $('#chatContent').offset().height;
+            if(data == 1){
+                //键盘弹出
+                uexChatKeyboard.changeWebViewFrame(contentHeight);
+            }else{
+                //键盘收起
+                uexChatKeyboard.changeWebViewFrame(contentHeight);
+            }
+        }
+    });
+
+    function GetConversationData(){
+        uexEasemob.getMessageHistory('{"username":"'+groupId+'","chatType":"1","startMsgId":"","pagesize":"0"}');
+    }
+
+
+    function NewMessage(data){
+        var userName = data.from;
+        SearchContactData (userName);
+        var nicName = appcan.locStorage.val("NicName");
+        appcan.locStorage.remove("NicName");
+        var messageId = data.messageId;
+        if(data.to == groupId){
+            var html = '';
+            html+='<div class="receiver imMsg line" id = "'+ messageId +'">';
+            html+='<div class="p-msg f-left"><div class="headImg" style="float:left;">';
+            html+='<img src="../MyContactContent/css/myImg/NoContactIcon.png"/></div>';
+            html+='<div class="msg-content f-left">';
+            html+='<div class="name ulev-1 sc-text">'+ nicName +'</div>';
+            html+='<div class="chatBox msg-spacing bc-r msgContent">';
+            switch(data.messageType){
+                case 'text':
+                    var stremo = data.messageBody.text;
+                    var reg = /\[([^\]]+)\]/g;
+                    stremo = stremo.replace(reg, function ($1) {
+                        return emoarr[$1] || $1;
+                    });
+                    html += stremo;
+                    html += '</div>';
+                    html += '<div class="arrow-left arrow-r-position2"></div>';
+                    html += '</div></div></div>';
+                    $('#chatContent').append(html);
+                    break;
+                case 'image':
+                    html+="<img src='"+data.messageBody.thumbnailRemotePath+"' width='100%'/>";
+                    html += '</div>';
+                    html += '<div class="arrow-left arrow-r-position2"></div>';
+                    html += '</div></div></div>';
+                    $('#chatContent').append(html);
+                    break;
+                case 'audio':
+                    html+="<span class='bc-text' onclick=PlayVoice('"+data.messageBody.remotePath+"');>";
+                    html+="&nbsp;[点击播放音频]</span>";
+                    html += '</div>';
+                    html += '<div class="arrow-left arrow-r-position2"></div>';
+                    html += '</div></div></div>';
+                    $('#chatContent').append(html);
+                    break;
+                case 'location':
+                    break;
+            }
+        }
+        window.location.hash = "#"+messageId;
+        LongPressEvent ();
+    }
+
+    function HistoryMessage(data){
+        var lastMsgId = '';
+        var plat = uexWidgetOne.platformName;
+        if(plat == "iOS"){data = data.messages;}
+        for(var i in data){
+            var _messageId = data[i].messageId,
+                _myId = data[i].from,
+                _groupId = data[i].to,
+                _messageType = data[i].messageType,
+                _messageBody = data[i].messageBody;
+            if(i == data.length - 1){
+                lastMsgId = data[i].messageId;
+            }
+            var userName = appcan.locStorage.val("MyUserID")+"邀请你加入了群聊",
+            msgText = _messageBody.text;
+            if(msgText == userName) {
+                continue;
+            }
+            var messageId = _messageId;
+            if(groupId==_groupId || myId == _groupId){
+                //我发的历史消息
+                if(myId == _myId){
+                    var html="";
+                    html+='<div class="sender imMsg line" id="'+ messageId +'">';
+                    html+='<div class="p-msg f-right"><div class="headImg" style="float:right;">';
+                    html+='<img src="../MyContactContent/css/myImg/NoContactIcon.png"/></div>';
+                    html+='<div class="msg-content f-right">';
+                    //html+='<div class="name ulev-1 sc-text tx-r">Zane</div>';
+                    html+='<div class="chatBox msg-spacing bc-s msgContent">';
+                    switch(_messageType){
+                        case 'text':
+                            var stremo = _messageBody.text;
+
+                            var reg = /\[([^\]]+)\]/g;
+                            stremo = stremo.replace(reg, function($1){
+                                return emoarr[$1] || $1;
+                            });
+                            html += stremo;
+                            html+='</div>';
+                            html+='<div class="arrow-right arrow-s-position"></div>';
+                            html+='</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'image':
+                            html+="<img src='"+_messageBody.remotePath+"' width='100%'/>";
+                            html+='</div>';
+                            html+='<div class="arrow-right arrow-s-position"></div>';
+                            html+='</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'audio':
+                            html+="<span class='bc-text' onclick=PlayVoice('"+_messageBody.remotePath+"');>";
+                            html+="&nbsp;[点击播放音频]</span>";
+                            html+='</div>';
+                            html+='<div class="arrow-right arrow-s-position"></div>';
+                            html+='</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'location':
+                            break;
+                    }
+                }else{
+                    //我收到的历史消息
+                    var userName = _myId;
+                    SearchContactData (userName);
+                    var nicName = appcan.locStorage.val("NicName");
+                    appcan.locStorage.remove("NicName");//<div class = 'ulev-1 sc-text umar-l' style = 'clear: both;'>"+nicName+"</div>
+                    var html = '';
+                    html+='<div class="receiver imMsg line" id = "'+ messageId +'">';
+                    html+='<div class="p-msg f-left"><div class="headImg" style="float:left;">';
+                    html+='<img src="../MyContactContent/css/myImg/NoContactIcon.png"/></div>';
+                    html+='<div class="msg-content f-left">';
+                    html+='<div class="name ulev-1 sc-text">'+nicName+'</div>';
+                    html+='<div class="chatBox msg-spacing bc-r msgContent">';
+                    switch(_messageType){
+                        case 'text':
+                            var stremo = _messageBody.text;
+                            if(stremo.length > 32 && stremo.substring (32, stremo.length) == "邀请你加入了群聊"){
+                                var userName = stremo.substring (0, 32);
+                                SearchContactData (userName);
+                                var nicName = appcan.locStorage.val("NicName");
+                                appcan.locStorage.remove("NicName");
+                                stremo = nicName + "邀请你加入了群聊";
+                            }
+                            var reg = /\[([^\]]+)\]/g;
+                            stremo = stremo.replace(reg, function ($1) {
+                                return emoarr[$1] || $1;
+                            });
+                            html += stremo;
+                            html += '</div>';
+                            html += '<div class="arrow-left arrow-r-position2"></div>';
+                            html += '</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'image':
+                            html+="<img src='"+_messageBody.remotePath+"' width='100%'/>";
+                            html += '</div>';
+                            html += '<div class="arrow-left arrow-r-position2"></div>';
+                            html += '</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'audio':
+                            html+="<span class='bc-text' onclick=PlayVoice('"+_messageBody.remotePath+"');>";
+                            html+="&nbsp;[点击播放音频]</span>";
+                            html += '</div>';
+                            html += '<div class="arrow-left arrow-r-position2"></div>';
+                            html += '</div></div></div>';
+                            $('#chatContent').append(html);
+                            break;
+                        case 'location':
+                            break;
+                    }
+                }
+            }
+        }
+        window.location.hash = "#"+lastMsgId;
+        LongPressEvent ();
+    }
+
+    function AddMyChat(str,typestr,messageId){
+        var html="";
+        html+='<div class="sender imMsg line" id="'+ messageId +'">';
+        html+='<div class="p-msg f-right"><div class="headImg" style="float:right;">';
+        html+='<img src="../MyContactContent/css/myImg/NoContactIcon.png"/></div>';
+        html+='<div class="msg-content f-right">';
+        //html+='<div class="name ulev-1 sc-text tx-r">Zane</div>';
+        html+='<div class="chatBox msg-spacing bc-s msgContent">';
+        if (typestr == 1) {
+            var stremo = str;
+            var reg = /\[([^\]]+)\]/g;
+            stremo = stremo.replace(reg, function($1){
+                return emoarr[$1] || $1;
+            });
+            html += stremo;
+        }
+        if(typestr==2){
+            html+="<img src='"+str+"' width='100%' />";
+        }
+        if(typestr==3){
+            html+="<span class='bc-text' onclick=PlayVoice('"+str+"');>&nbsp;[点击播放音频]</span>";
+        }
+        if(typestr==4){
+            html+="<span class='bc-text' onclick=openfile('"+str+"');>&nbsp;&nbsp;[文件]</span>";
+        }
+        if(typestr==5){
+            html+="<img src='css/res/map.png' width='100%'/>";
+            html+="<span class='bc-text' onclick=openmap('"+lat+"','"+lon+"');>&nbsp;&nbsp;[点击打开地图]</span>";
+        }
+        html+='</div>';
+        html+='<div class="arrow-right arrow-s-position"></div>';
+        html+='</div></div></div>';
+        $('#chatContent').append(html);
+        window.location.hash = "#"+messageId;
+        LongPressEvent ();
+    }
+
+    function CameraOpen(){
+        uexCamera.cbOpen=function (opCode, dataType, data){
+            SendPic(data);
+        }
+        uexCamera.open();
+    }
+
+    function PhotoOpen(){
+        uexImageBrowser.cbPick=function (opCode,dataType,data){
+            SendPic(data);
+        }
+        uexImageBrowser.pick();
+    }
+
+    function SendPic(str){
+        if(str==""){return;}
+        uexEasemob.sendPicture('{"username":"'+groupId+'","chatType":"1","filePath":"'+str+'","displayName":"picture"}');
+    }
+
+    function Voice(){
+        var t=Math.round(new Date().getTime());//按时间做为文件名称
+        uexAudio.startBackgroundRecord(2,t);//录音为mp3格式，需删除插件再请选择最新的插件。
+    }
+
+    function StopVoice(){
+        uexAudio.cbBackgroundRecord = function(opCode, dataType, data){
+            PostVoice(data);
+        }
+        uexAudio.stopBackgroundRecord();
+    }
+
+    function PostVoice(str){
+        //AddMyChat(str,3);//播放音频
+        uexEasemob.sendVoice('{"username":"'+groupId+'","chatType":"1","filePath":"'+str+'","length":"60","displayName":"voicename"}');
+    }
+
+    function PlayVoice(str){
+        if(str){
+            uexAudio.open(str);
+            uexAudio.play('1');
+            isplay = true;
+        }
+    }
+
+    //下拉刷新
+    function GetRefreshData(){
+        var index = appcan.locStorage.val("CURRENT_INDEX");
+        var convaersationData = JSON.parse(appcan.locStorage.val("CONVERSATION_DATA"));
+        var messageId = convaersationData[index];
+        uexEasemob.getMessageHistory('{"username":"'+sendId+'","chatType":"0","startMsgId":' + messageId + ',"pagesize":"5"}')
+        var currentIndex = index - 5;
+        appcan.locStorage.setVal("CURRENT_INDEX", currentIndex);
+    }
+
+    function GetChatter(data){
+        return data;
+    }
+
+    function openChatKeyboard(){
+        var jsonstr ={
+            "emojicons":"res://emojicons/emojicons.xml",
+            "shares":"res://shares/shares.xml",
+            "placeHold":"请输入内容",
+            "touchDownImg":"res://3.png",
+            "dragOutsideImg":"res://4.png",
+            "textColor":"#FFF",
+            "textSize":"15.5",
+            "bottom":"100"
+        };
+        jsonstr = JSON.stringify(jsonstr);
+        uexChatKeyboard.open(jsonstr);
+    }
+
+    function closeChatKeyboard(){
+        uexChatKeyboard.close();
+    }
+
+    function getFormatTime(nS) {
+        return new Date(parseInt(nS)).toLocaleString().replace(/:\d{1,2}$/,' ');
+    }
+
+    function LongPressEvent () {
+        $(".line").longTap(function(){
+            var messageId = $(this).attr("id");
+            appcan.locStorage.setVal("MessageId", messageId);
+            appcan.locStorage.setVal("MessageIdFrom", "Chatroom");
+            appcan.window.popoverElement({
+                id:'PopOverContent',
+                url:'PopOverContent.html'
+            });
+        });
+    }
+
+    function DeleteConfirm () {
+        appcan.window.confirm({
+            title:'提示',
+            content:'确认删除？',
+            buttons:['确定', '取消'],
+            callback:function(err,data,dataType,optId){
+                if(data == "0"){
+                    var messageId = appcan.locStorage.val("MessageId");
+                    uexEasemob.removeMessage('{"username":"'+groupId+'","msgId":"'+messageId+'","chatType":"1"}')
+                    $("#"+messageId).remove();
+                }
+            }
+        });
+    }
+
+    function SearchContactData (userId) {
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var Url = apiConfig.GetContactInfo.Url;
+        var Type = apiConfig.GetContactInfo.Type;
+        var parameters = {"userId": userId};
+        var url = GetMappingUrl(Url, parameters);
+        var isSuccess = 0;
+        $.ajax({
+            url: url,
+            type: Type,
+            async: false,
+            dataType: "json",
+            contentType: "application/json; charset = utf-8",
+            success: function (data) {
+                isSuccess = 1;
+                appcan.locStorage.setVal("NicName", data.Result.Name);
+            },
+            complete: function () {
+                if (isSuccess == 0) {
+                    appcan.window.openToast("Error!", 2000);
+                }
+            }
+        });
+    }
+</script>
+</html>

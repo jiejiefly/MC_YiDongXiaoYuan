@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/ui-box.css">
+    <link rel="stylesheet" href="../../css/ui-base.css">
+    <link rel="stylesheet" href="../../css/ui-color.css">
+    <link rel="stylesheet" href="../../css/appcan.icon.css">
+    <link rel="stylesheet" href="../../css/appcan.control.css">
+    <link rel="stylesheet" href="EmailListContent/css/main.css">
+</head>
+<body class="um-vp bc-bg" ontouchstart ng-app="EmailListModule" ng-controller="EmailListController">
+<!--<div class="sc-bg-active uinput ub ub-f1  bc-border uba">-->
+    <!--<div class="uinn fa fa-search sc-text"></div>-->
+    <!--<input placeholder="搜索" type="text" class="ub-f1" id="searchBox" ng-model="Search">-->
+<!--</div>-->
+<!-- <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">
+    <div class="uinput ub ub-f1 ubb">
+        <div class="uinn fa fa-search"></div>
+        <input placeholder="搜索" type="text" class="ub-f1" style="outline:none;" id="searchBox" ng-model="Search">
+    </div>
+</h1> -->
+<div class="umar-a sc-bg">
+    <div id="EmailList"></div>
+    <div id="EmailListTample" style="display: none;">
+        <ul>
+            <li ng-repeat="Email in EmailListData | filter:Search" EmailId="{{Email.EmailId}}" IsRead="{{Email.IsRead}}"
+                class="Email ubb ub bc-border t-bla ub-ac lis" data-index="0">
+                <ul class="ub ub ub-ver">
+                    <li class="">
+                        <div class="lis-icon ub-img avatar" style="background-image:url({{Email.Avatar}})"
+                             ng-if="Email.Avatar != ''"></div>
+                        <div class="lis-icon ub-img avatar avatarBorder" ng-if="Email.Avatar == ''"
+                             ng-bind="Email.Addresser|Avatar"></div>
+                        <div class="ulev-1 bc-text umar-t"></div>
+                    </li>
+                </ul>
+                <ul class="ub-f1 ub ub-pj ub-ac">
+                    <ul class="ub-f1 ub ub-ver marg-l">
+                        <li class="Addresser bc-text ub ub-ver ut-m line1 wordBreak" ng-bind="Email.Addresser"></li>
+                        <li class="ulev-1 sc-text1 uinn3">
+                            <div class="wordBreak" ng-bind="Email.Title|limitTo:11"></div>
+                        </li>
+                        <li class="ulev-1 sc-text1 uinn3">
+                            <div class="sc-text wordBreak" ng-bind="Email.Content|limitTo:28"></div>
+                        </li>
+                    </ul>
+                    <li class="ulev-4 bc-text-head sc-bg-alert tab_badge1 UnRead" EmailId="{{Email.EmailId}}"
+                        ng-show="Email.IsRead==false"></li>
+                    <li class="fa fa-angle-right ulev2"></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<script src="../../js/appcan.js"></script>
+<script src="../../js/appcan.control.js"></script>
+<script src="../../js/appcan.listview.js"></script>
+<script src="../../js/Common.js"></script>
+<script src="../../js/angular.min.js"></script>
+</body>
+<script>
+    var index = 1;
+    var size = 20;
+    var emailList = angular.module("EmailListModule", []);
+    emailList.controller("EmailListController", function ($scope) {
+        appcan.ready(function () {
+            GetEmailList($scope, index, size);
+            Refresh($scope, index, size);
+        });
+    });
+    emailList.filter("Avatar", function () {
+        var avatarText = function (addresser) {
+            return addresser.substr(0, 2);
+        };
+        return avatarText;
+    })
+
+    function GetEmailList($scope, index, size) {
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var emailGroupId = appcan.locStorage.val("EmailGroupId");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var getEmailListUrl = apiConfig.GetEmailList.Url;
+        var getEmailListType = apiConfig.GetEmailList.Type;
+        var getEmailListParameters = {"emailGroupId": emailGroupId, "accessToken": token, "index": index, "size": size};
+        getEmailListUrl = GetMappingUrl(getEmailListUrl, getEmailListParameters);
+        $.ajax({
+            url: getEmailListUrl,
+            type: getEmailListType,
+            data: getEmailListParameters,
+            dataType: "json",
+            success: function (msg) {
+                isSuccess = 1;
+                $scope.EmailListData = msg;
+                $scope.$apply();
+                var emailListTample = $("#EmailListTample").html();
+                if (index == 1) {
+                    $("#EmailList").html(emailListTample);
+                } else {
+                    $("#EmailList").append(emailListTample);
+                }
+                ClickEvent();
+            },
+            complete: function (xhr, status) {
+                if (isSuccess == 0) {
+                    appcan.window.confirm({
+                        title: '错误信息',
+                        content: '获取消息列表失败！',
+                        buttons: ['重试', '退出'],
+                        callback: function (err, data, dataType, optId) {
+                            if (err) {
+                                return;
+                            }
+                            if (data == 0) {
+                                GetEmailList($scope, index, size);
+                            }
+                            else if (data == 1) {
+                                appcan.window.evaluateScript({
+                                    name: 'EmailList',
+                                    scriptContent: 'CloseWindow()'
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });//ajax结束
+    }
+
+    function Refresh($scope, index, size) {
+        appcan.frame.setBounce({
+            bounceType: [0, 1],
+            startPullCall: function (type) {
+                if (type == 0) {
+                    index = 1;//下拉页码重新开始计数
+                } else {
+                    index += 1;
+                }
+                GetEmailList($scope, index, size);
+            },
+            upEndCall: function (type) {
+                //上拉加载更多
+//                index += 1;
+//                GetEmailList($scope, index, size);
+                appcan.frame.resetBounce(type);
+            },
+            downEndCall: function (type) {
+                //下拉刷新
+//                index = 1;
+//                GetEmailList($scope, index, size);
+                appcan.frame.resetBounce(type);
+            },
+            color: '#FFF',
+            imgSettings: {
+                //"imagePath":"res://reload.png",
+                "textColor": "#530606",
+                "pullToReloadText": "继续拖动加载",
+                "releaseToReloadText": "释放加载",
+                "loadingText": "加载中，请稍等"
+            }
+        });
+    }
+
+    function ClickEvent() {
+        $(".Email").on("click", function () {
+            var addresser = $(this).find(".Addresser").html();
+            var emailId = $(this).attr("EmailId");
+            appcan.locStorage.val("addresser", addresser);
+            appcan.locStorage.val("EmailId", emailId);
+            appcan.window.open("EmailDetails", "EmailList/EmailDetails.html", 5);
+            var isRead = $(this).attr("IsRead");
+            if (isRead == "false") {
+                SetEmailRead(emailId);
+            }
+        })
+    }
+
+    function SetEmailRead(emailId) {
+        var isSuccess = 0;
+        var token = appcan.locStorage.val("Token");
+        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+        var setEmailReadUrl = apiConfig.SetEmailRead.Url;
+        var setEmailReadType = apiConfig.SetEmailRead.Type;
+        var setEmailReadParameters = {"emailId": emailId, "accessToken": token};
+        setEmailReadUrl = GetMappingUrl(setEmailReadUrl, setEmailReadParameters);
+        $.ajax({
+            url: setEmailReadUrl,
+            type: setEmailReadType,
+            data: setEmailReadParameters,
+            dataType: "json",
+            success: function (msg) {
+                isSuccess = 1;
+                $(".UnRead[EmailId='" + emailId + "']").hide();
+            },
+            complete: function (xhr, status) {
+                if (isSuccess == 0) {
+
+                }
+            }
+        });//ajax结束
+    }
+
+    function SetEmailUnRead(emailId) {
+        $(".UnRead[EmailId='" + emailId + "']").show();
+    }
+
+
+</script>
+</html>

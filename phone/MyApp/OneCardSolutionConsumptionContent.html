@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html ng-app ng-controller="OneCardController" class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+    <title>消费</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="../css/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/ui-box.css">
+    <link rel="stylesheet" href="../css/ui-base.css">
+    <link rel="stylesheet" href="../css/ui-color.css">
+    <link rel="stylesheet" href="../css/appcan.icon.css">
+    <link rel="stylesheet" href="../css/appcan.control.css">
+    <link rel="stylesheet" href="OneCardSolutionConsumptionContent/css/main.css">
+</head>
+<body class="um-vp bc-bg">
+    <div class="c-wh ubb bc-border clearfix" style="padding: .8em 0.5em .8em 0.5em">
+        <div style="float: left">开始时间</div>
+        <div id="btn3" class="Button" style="float: right">
+            <span id="addYear1"></span>&nbsp;年
+            <span id="addMonth1"></span>&nbsp;月
+            <span id="addDay1"></span>&nbsp;日
+        </div>
+    </div>
+    <div class="c-wh ubb bc-border clearfix" style="padding: .8em 0.5em .8em 0.5em">
+        <div style="float: left">结束时间</div>
+        <div id="btn4" class="Button" style="float: right">
+            <span id="addYear2"></span>&nbsp;年
+            <span id="addMonth2"></span>&nbsp;月
+            <span id="addDay2"></span>&nbsp;日
+        </div>
+    </div>
+    <br />
+    <div class="uinn umar-t">
+        <div class="btn Button uba ub ub-ac ub-pc c-wh uc-a1" id="submit">
+            查询
+        </div>
+    </div>
+    <br />
+    <div id="divContent" style="display: none">
+        <div class="bc-bg" ng-if="NoData==1">
+            <div class="NoDataImg_box ">
+                <div class="NoDataImg_bg"></div>
+            </div>
+            <div class="NoData_box NoData_color">抱歉，暂时没有您要查看的数据！</div>
+        </div>
+        <div class="ubb ub bc-border t-bla ub-ac lis VehicleAudit" ng-repeat="data in OneCardData" ng-if="NoData!=1">
+            <div class="ub-f1 ub ub-ver marg-l">
+                <div class="ub ub-f1 ub-pj">
+                    <div class="ub ub-ver ut-m ulev0  umar-t "><strong>商户：{{data.BusinessName}}</strong></div>
+                    <div class="ulev0  umar-t">{{data.Data}}</div>
+                </div>
+                <div class="ub ub-f1 ub-pj">
+                    <div class="ub ub-ver ut-m ulev0  umar-t ">类型：{{data.Status}}</div>
+                    <div class="ulev0  umar-t">地点：{{data.Place}}</div>
+                </div>
+                <div class="ub ub-f1 ub-pj ">
+                    <div class="ub ub-ver ut-m ulev0  umar-t blue">金额：{{data.Money}}</div>
+                    <div class="ulev0 umar-t blue">余额：{{data.Balance}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../js/appcan.js"></script>
+<script src="../js/appcan.control.js"></script>
+<script src="../js/angular.min.js"></script>
+<script src="../js/Common.js"></script>
+<script>
+    function OneCardController($scope) {
+        var beginTime;
+        var endTime;
+        var date = new Date();
+        var currentYear = date.getFullYear();  //获取年
+        var currentMonth = date.getMonth();    //获取月
+        var currentDay = date.getDate();    //获取日
+        var currentYear1 = currentYear;
+        var currentYear2 = currentYear;
+        var currentMonth1 = currentMonth;
+        var currentMonth2 = currentMonth + 1;
+        if (currentMonth2 < 10) {
+            currentMonth2 = "0" + currentMonth2;
+        }
+        if (currentMonth1 == 0) {
+            currentMonth1 = 12;
+            currentYear1 = currentYear - 1;
+        }
+        else if (currentMonth1 < 10) {
+            currentMonth1 = "0" + currentMonth1;
+        }
+        $("#addYear1").html(currentYear1);
+        $("#addYear2").html(currentYear2);
+        $("#addMonth1").html(currentMonth1);
+        $("#addMonth2").html(currentMonth2);
+        $("#addDay1").html(currentDay);
+        $("#addDay2").html(currentDay);
+        appcan.ready(function () {
+            uexControl.cbOpenDatePicker = function (opCode, dataType, data) {
+                var obj = eval('(' + data + ')');
+                if (btnID == "btn3") {
+                    var addyear1 = JSON.stringify(obj.year);
+                    var addMonth1 = JSON.stringify(obj.month);
+                    var addDay1 = JSON.stringify(obj.day);
+                    if (addMonth1.length < 2) {
+                        addMonth1 = '0' + addMonth1;
+                    }
+                    if (addDay1.length < 2) {
+                        addDay1 = '0' + addDay1;
+                    }
+                    $("#addYear1").html(addyear1);
+                    $("#addMonth1").html(addMonth1);
+                    $("#addDay1").html(addDay1);
+                    beginTime = addyear1 + addMonth1;
+                }
+                else {
+                    var addyear2 = JSON.stringify(obj.year);
+                    var addMonth2 = JSON.stringify(obj.month);
+                    var addDay2 = JSON.stringify(obj.day);
+                    if (addMonth2.length < 2) {
+                        addMonth2 = '0' + addMonth2;
+                    }
+                    if (addDay2.length < 2) {
+                        addDay2 = '0' + addDay2;
+                    }
+                    $("#addYear2").html(addyear2);
+                    $("#addMonth2").html(addMonth2);
+                    $("#addDay2").html(addDay2);
+                    endTime = addyear2 + addMonth2;
+                }
+            };
+        });
+
+        appcan.button(".Button", "ani-act", function () {
+            switch (this.id) {
+                case "btn3":
+                    var year = parseInt($('#addYear1').html(), 10);
+                    var month = parseInt($('#addMonth1').html(), 10);
+                    var day = parseInt($('#addDay1').html(), 10);
+                    uexControl.openDatePicker(year, month, day);
+                    btnID = 'btn3';
+                    break;
+                case "btn4":
+                    var year = parseInt($('#addYear2').html(), 10);
+                    var month = parseInt($('#addMonth2').html(), 10);
+                    var day = parseInt($('#addDay2').html(), 10);
+                    uexControl.openDatePicker(year, month, day);
+                    btnID = 'btn4';
+                    break;
+                case "submit":
+                    var beginTime = $("#addYear1").html() + $("#addMonth1").html() + $("#addDay1").html();
+                    var endTime = $("#addYear2").html() + $("#addMonth2").html() + $("#addDay2").html();
+                    if (beginTime > endTime) {
+                        alert("开始时间需小于结束时间！");
+                    }
+                    else {
+                        var isSuccess = 0;
+                        var Token = appcan.getLocVal("Token");
+                        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+                        var Type = apiConfig.GetOneCard.Type;
+                        var Url = apiConfig.GetOneCard.Url;
+                        var parameters = { "beginTime": beginTime, "endTime": endTime, "token": Token };
+                        var url = GetMappingUrl(Url, parameters);
+                        $.ajax({
+                            url: url,
+                            type: Type,
+                            data: parameters,
+                            dataType: "json",
+                            success: function (data) {
+                                isSuccess = 1;
+                                $scope.OneCardData = data;
+                                $scope.$apply();
+                                appcan.locStorage.setVal("OneCardData", data);
+                                if (data == "") {
+                                    $scope.NoData = 1;
+                                    $scope.$apply();
+                                }
+                            },
+                            complete: function () {
+                                $("#divContent").show();
+                                if (isSuccess == 0) {
+                                    appcan.ready(function () {
+                                        appcan.window.openToast({
+                                            msg: '加载最新数据失败',
+                                            duration: '2000',
+                                            position: '5',
+                                            type: '0'
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                    }
+            }
+        });
+    }
+
+    //    function OneCardController($scope) {
+    //        var isSuccess = 0;
+    //        var Token = appcan.getLocVal("Token");
+    //        var apiConfig = JSON.parse(appcan.getLocVal("ApiConfig"));
+    //        var Type = apiConfig.GetOneCard.Type;
+    //        var Url = apiConfig.GetOneCard.Url;
+    //        var parameters = { "token": Token };
+    //        var url = GetMappingUrl(Url, parameters);
+    //        $.ajax({
+    //            url: url,
+    //            type: Type,
+    //            data: parameters,
+    //            dataType: "json",
+    //            success: function (data) {
+    //                isSuccess = 1;
+    //                $scope.OneCardData = data;
+    //                $scope.$apply();
+    //                appcan.locStorage.setVal("OneCardData", data);
+    //                if (data == "") {
+    //                    $scope.NoData = 1;
+    //                    $scope.$apply();
+    //                }
+    //            },
+    //            complete: function () {
+    //                if (isSuccess == 0) {
+    //                    appcan.ready(function () {
+    //                        appcan.window.openToast({
+    //                            msg: '加载最新数据失败',
+    //                            duration: '2000',
+    //                            position: '5',
+    //                            type: '0'
+    //                        });
+    //                    });
+    //                }
+    //            }
+    //        });
+    //    }
+</script>
+</html>
